@@ -5,6 +5,7 @@ public class PlayerController : MonoBehaviour
 {
     [Header("Input Actions")]
     private PlayerInput playerInput;
+    private InputSystem_Actions inputActions;
     private InputAction moveAction;
     private InputAction jumpAction;
     private InputAction attackAction;
@@ -39,42 +40,46 @@ public class PlayerController : MonoBehaviour
 
     private void Awake()
     {
-        // Cache components
         rb = GetComponent<Rigidbody2D>();
         animator = GetComponent<Animator>();
         playerInput = GetComponent<PlayerInput>();
-
-        // Initialize input actions
-        moveAction = playerInput.actions["Move"];
-        jumpAction = playerInput.actions["Jump"];
-        attackAction = playerInput.actions["Attack"];
-        interactAction = playerInput.actions["Interact"];
-        sprintAction = playerInput.actions["Sprint"];
-
-        // Configure rigidbody
+        
+        inputActions = new InputSystem_Actions();  
+        moveAction = inputActions.Player.Move;
+        jumpAction = inputActions.Player.Jump;
+        attackAction = inputActions.Player.Attack;
+        interactAction = inputActions.Player.Interact;
+        sprintAction = inputActions.Player.Sprint;
+        
         rb.constraints = RigidbodyConstraints2D.FreezeRotation;
     }
 
     private void OnEnable()
     {
-        // Subscribe to input events
+        inputActions.Enable();
         moveAction.performed += OnMove;
         moveAction.canceled += OnMove;
         jumpAction.performed += OnJump;
+        jumpAction.canceled += OnJump;
         attackAction.performed += OnAttack;
+        attackAction.canceled += OnAttackCanceled;
         interactAction.performed += OnInteract;
+        interactAction.canceled += OnInteractCanceled;
         sprintAction.performed += OnSprint;
         sprintAction.canceled += OnSprintCanceled;
     }
 
     private void OnDisable()
     {
-        // Unsubscribe from input events
+        inputActions.Disable();
         moveAction.performed -= OnMove;
         moveAction.canceled -= OnMove;
         jumpAction.performed -= OnJump;
+        jumpAction.canceled -= OnJump;
         attackAction.performed -= OnAttack;
+        attackAction.canceled -= OnAttackCanceled;
         interactAction.performed -= OnInteract;
+        interactAction.canceled -= OnInteractCanceled;
         sprintAction.performed -= OnSprint;
         sprintAction.canceled -= OnSprintCanceled;
     }
@@ -82,10 +87,6 @@ public class PlayerController : MonoBehaviour
     private void FixedUpdate()
     {
         CheckGrounded();
-        if (isGrounded)
-        {
-            isJumping = false;
-        }
         HandleMovement();
         HandleJumpBuffer();
         UpdateAnimator();
@@ -94,6 +95,10 @@ public class PlayerController : MonoBehaviour
     private void CheckGrounded()
     {
         isGrounded = Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, groundLayer);
+        if (isGrounded)
+        {
+            isJumping = false;
+        }
     }
 
     private void HandleMovement()
@@ -102,10 +107,17 @@ public class PlayerController : MonoBehaviour
         cachedVelocity.x = moveInput.x * currentSpeed;
         cachedVelocity.y = rb.linearVelocity.y;
         rb.linearVelocity = cachedVelocity;
+        
+        Debug.Log($"Velocity: {rb.linearVelocity}, Speed: {currentSpeed}");
 
-        // Flip character based on movement direction
-        if (moveInput.x > 0 && !isFacingRight) Flip();
-        else if (moveInput.x < 0 && isFacingRight) Flip();
+        if (moveInput.x != 0)
+        {
+            bool shouldFaceRight = moveInput.x > 0;
+            if (shouldFaceRight != isFacingRight)
+            {
+                Flip();
+            }
+        }
     }
 
     private void HandleJumpBuffer()
@@ -143,23 +155,7 @@ public class PlayerController : MonoBehaviour
     private void OnMove(InputAction.CallbackContext context)
     {
         moveInput = context.ReadValue<Vector2>();
-        
-        // Update cached velocity
-        cachedVelocity.x = moveInput.x * (isSprinting ? sprintSpeed : moveSpeed);
-        cachedVelocity.y = rb.linearVelocity.y;
-        
-        // Apply movement
-        rb.linearVelocity = cachedVelocity;
-
-        // Handle character facing direction
-        if (moveInput.x != 0)
-        {
-            bool shouldFaceRight = moveInput.x > 0;
-            if (shouldFaceRight != isFacingRight)
-            {
-                Flip();
-            }
-        }
+        Debug.Log($"Move Input: {moveInput}"); // Add this debug line
     }
 
     private void OnJump(InputAction.CallbackContext context)
@@ -170,11 +166,9 @@ public class PlayerController : MonoBehaviour
             isJumping = true;
             rb.AddForce(Vector2.up * jumpForce, ForceMode2D.Impulse);
         }
-
-        if (context.canceled && rb.linearVelocity.y > 0)
+        else if (context.canceled && rb.linearVelocity.y > 0)
         {
             rb.linearVelocity = new Vector2(rb.linearVelocity.x, rb.linearVelocity.y * 0.5f);
-            isJumping = false;
         }
     }
 
@@ -186,12 +180,22 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    private void OnAttackCanceled(InputAction.CallbackContext context)
+    {
+        isAttacking = false;
+    }
+
     private void OnInteract(InputAction.CallbackContext context)
     {
         if (context.performed)
         {
             isInteracting = true;
         }
+    }
+
+    private void OnInteractCanceled(InputAction.CallbackContext context)
+    {
+        isInteracting = false;
     }
 
     private void OnSprint(InputAction.CallbackContext context)
@@ -208,12 +212,15 @@ public class PlayerController : MonoBehaviour
     }
     #endregion
 
-    private void OnCollisionEnter(Collision collision)
+    private void OnCollisionEnter2D(Collision2D collision)
     {
         if (collision.gameObject.CompareTag("Ground"))
         {
             isJumping = false;
-            animator.SetTrigger("Idle");
+            if (animator != null)
+            {
+                animator.SetTrigger("Idle");
+            }
         }
     }
 }
