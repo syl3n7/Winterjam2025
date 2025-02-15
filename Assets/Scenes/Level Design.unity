@@ -155765,6 +155765,10 @@ PrefabInstance:
       propertyPath: m_Layer
       value: 6
       objectReference: {fileID: 0}
+    - target: {fileID: 71240024150879954, guid: 76957f06908ce440aa44c909254f5894, type: 3}
+      propertyPath: respawnPoint
+      value: 
+      objectReference: {fileID: 1775949274}
     - target: {fileID: 774517362754026076, guid: 76957f06908ce440aa44c909254f5894, type: 3}
       propertyPath: m_Layer
       value: 6

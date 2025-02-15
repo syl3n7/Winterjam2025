@@ -17,7 +17,11 @@ public class EnemyPatrol : MonoBehaviour
 
     [Header("Combat")]
     [SerializeField] private int maxHealth = 3;
+    [SerializeField] private int damageAmount = 1;
+    [SerializeField] private float damageInterval = 0.7f;
     private int currentHealth;
+    private float damageTimer;
+    private bool canDealDamage = true;
 
     private Vector3 currentTarget;
     private Rigidbody2D rb;
@@ -28,6 +32,8 @@ public class EnemyPatrol : MonoBehaviour
     private bool isWaitingAfterChase;
     private Vector3 lastKnownPlayerPosition;
     private EnemyState currentState = EnemyState.Patrolling;
+
+    private DamageFlash damageFlash;
 
     private enum EnemyState
     {
@@ -49,6 +55,8 @@ public class EnemyPatrol : MonoBehaviour
             Debug.LogError($"Patrol points not set on {gameObject.name}");
             enabled = false;
         }
+
+        damageFlash = GetComponent<DamageFlash>();
     }
 
     private void Update()
@@ -187,6 +195,11 @@ public class EnemyPatrol : MonoBehaviour
     {
         currentHealth -= damage;
         
+        if (damageFlash != null)
+        {
+            damageFlash.Flash();
+        }
+        
         if (currentHealth <= 0)
         {
             Die();
@@ -212,6 +225,33 @@ public class EnemyPatrol : MonoBehaviour
             // Draw detection radius
             Gizmos.color = Color.red;
             Gizmos.DrawWireSphere(transform.position, detectionRadius);
+        }
+    }
+
+    private void FixedUpdate()
+    {
+        if (!canDealDamage)
+        {
+            damageTimer += Time.fixedDeltaTime;
+            if (damageTimer >= damageInterval)
+            {
+                canDealDamage = true;
+                damageTimer = 0f;
+            }
+        }
+    }
+
+    private void OnCollisionStay2D(Collision2D collision)
+    {
+        if (collision.gameObject.CompareTag("Player") && canDealDamage)
+        {
+            PlayerController player = collision.gameObject.GetComponent<PlayerController>();
+            if (player != null)
+            {
+                player.TakeDamage(damageAmount);
+                canDealDamage = false;
+                damageTimer = 0f;
+            }
         }
     }
 }

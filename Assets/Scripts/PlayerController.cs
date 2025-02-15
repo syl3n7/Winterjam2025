@@ -52,6 +52,7 @@ public class PlayerController : MonoBehaviour
     private Rigidbody2D rb;
     private Animator animator;
     private WizDemo1 wizAnimator;
+    private DamageFlash damageFlash;
 
     [Header("Combat")]
     [SerializeField] private GameObject projectilePrefab;
@@ -78,6 +79,7 @@ public class PlayerController : MonoBehaviour
         sprintAction = inputActions.Player.Sprint;
         
         rb.constraints = RigidbodyConstraints2D.FreezeRotation;
+        damageFlash = GetComponent<DamageFlash>();
     }
 
     private void Start()
@@ -482,6 +484,30 @@ public class PlayerController : MonoBehaviour
             return;
         }
 
+        if (wizAnimator != null)
+        {
+            wizAnimator.Hurt();
+        }
+    }
+
+    public void TakeDamage(int damage)
+    {
+        if (isFlipping) return; // Optional: ignore damage while flipping
+
+        currentHealth -= damage;
+        
+        if (damageFlash != null)
+        {
+            damageFlash.Flash();
+        }
+
+        if (currentHealth <= 0)
+        {
+            Die();
+            return;
+        }
+
+        // Optional: Add invincibility frames or knockback here
         if (wizAnimator != null)
         {
             wizAnimator.Hurt();
