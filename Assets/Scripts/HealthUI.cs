@@ -4,13 +4,13 @@ using System.Collections.Generic;
 
 public class HealthUI : MonoBehaviour
 {
-    [Header("UI Settings")]
+    [Header("Heart Settings")]
     [SerializeField] private GameObject heartPrefab;
     [SerializeField] private Sprite fullHeartSprite;
     [SerializeField] private Sprite emptyHeartSprite;
-    [SerializeField] private float heartSpacing = 10f;
     [SerializeField] private Vector2 heartSize = new Vector2(50f, 50f);
-    [SerializeField] private Vector2 topRightOffset = new Vector2(20f, 20f);
+    [SerializeField] private float spacing = 10f;
+    [SerializeField] private Image[] heartImages = new Image[3];
 
     private List<Image> hearts = new List<Image>();
     private RectTransform rectTransform;
@@ -18,7 +18,7 @@ public class HealthUI : MonoBehaviour
     private void Awake()
     {
         rectTransform = GetComponent<RectTransform>();
-        SetupAnchors();
+        SetupUIPosition();
     }
 
     private void Start()
@@ -28,28 +28,28 @@ public class HealthUI : MonoBehaviour
         {
             SetupHearts(player.MaxHealth);
         }
+
+        // Make sure all hearts are full at start
+        UpdateHearts(3);
     }
 
-    private void SetupAnchors()
+    private void SetupUIPosition()
     {
         // Position in top-right corner
-        rectTransform.anchorMin = new Vector2(1, 1);
-        rectTransform.anchorMax = new Vector2(1, 1);
-        rectTransform.pivot = new Vector2(1, 1);
-        rectTransform.anchoredPosition = -topRightOffset;
+        rectTransform.anchorMin = Vector2.one;
+        rectTransform.anchorMax = Vector2.one;
+        rectTransform.pivot = Vector2.one;
+        rectTransform.anchoredPosition = new Vector2(-20f, -20f); // 20 pixels from top-right
     }
 
     private void SetupHearts(int maxHealth)
     {
-        // Clear existing hearts
+        // Clear any existing hearts
         foreach (Transform child in transform)
         {
             Destroy(child.gameObject);
         }
         hearts.Clear();
-
-        // Calculate total width needed
-        float totalWidth = (heartSize.x + heartSpacing) * maxHealth - heartSpacing;
 
         // Create hearts from right to left
         for (int i = 0; i < maxHealth; i++)
@@ -57,19 +57,18 @@ public class HealthUI : MonoBehaviour
             GameObject heartObj = Instantiate(heartPrefab, transform);
             RectTransform heartTransform = heartObj.GetComponent<RectTransform>();
             
-            // Set size
-            heartTransform.sizeDelta = heartSize;
-            
             // Position from right to left
-            float xPos = -((heartSize.x + heartSpacing) * i);
+            float xPos = -(heartSize.x + spacing) * i;
             heartTransform.anchoredPosition = new Vector2(xPos, 0);
             
             Image heartImage = heartObj.GetComponent<Image>();
             heartImage.sprite = fullHeartSprite;
+            heartImage.rectTransform.sizeDelta = heartSize;
             hearts.Add(heartImage);
         }
 
-        // Set container width to fit all hearts
+        // Set container size
+        float totalWidth = (heartSize.x + spacing) * maxHealth - spacing;
         rectTransform.sizeDelta = new Vector2(totalWidth, heartSize.y);
     }
 
@@ -78,6 +77,11 @@ public class HealthUI : MonoBehaviour
         for (int i = 0; i < hearts.Count; i++)
         {
             hearts[i].sprite = i < currentHealth ? fullHeartSprite : emptyHeartSprite;
+        }
+
+        for (int i = 0; i < heartImages.Length; i++)
+        {
+            heartImages[i].sprite = i < currentHealth ? fullHeartSprite : emptyHeartSprite;
         }
     }
 }
