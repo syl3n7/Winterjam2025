@@ -22,6 +22,12 @@ public class PlayerController : MonoBehaviour
     private Vector2 moveInput;
     private Vector2 cachedVelocity;
 
+    [Header("Ceiling Walking")]
+    [SerializeField] private float ceilingCheckDistance = 1f;
+    [SerializeField] private float ceilingDetachThreshold = 0.1f;
+    [SerializeField] private KeyCode attachToCeilingKey = KeyCode.LeftShift;
+    private bool isAttachedToCeiling;
+
     [Header("States")]
     private bool isJumping;
     private bool isGrounded;
@@ -87,6 +93,7 @@ public class PlayerController : MonoBehaviour
     private void FixedUpdate()
     {
         CheckGrounded();
+        CheckCeilingAttachment();  // Add this line
         HandleMovement();
         HandleJumpBuffer();
         UpdateAnimator();
@@ -105,10 +112,17 @@ public class PlayerController : MonoBehaviour
     {
         float currentSpeed = isSprinting ? sprintSpeed : moveSpeed;
         cachedVelocity.x = moveInput.x * currentSpeed;
-        cachedVelocity.y = rb.linearVelocity.y;
-        rb.linearVelocity = cachedVelocity;
         
-        Debug.Log($"Velocity: {rb.linearVelocity}, Speed: {currentSpeed}");
+        if (isAttachedToCeiling)
+        {
+            cachedVelocity.y = 0f;
+        }
+        else
+        {
+            cachedVelocity.y = rb.linearVelocity.y;
+        }
+        
+        rb.linearVelocity = cachedVelocity;
 
         if (moveInput.x != 0)
         {
@@ -160,13 +174,21 @@ public class PlayerController : MonoBehaviour
 
     private void OnJump(InputAction.CallbackContext context)
     {
-        if (context.performed && isGrounded)
+        if (context.performed)
         {
-            jumpBufferCounter = inputBufferTime;
-            isJumping = true;
-            rb.AddForce(Vector2.up * jumpForce, ForceMode2D.Impulse);
+            if (isAttachedToCeiling)
+            {
+                DetachFromCeiling();
+                rb.AddForce(Vector2.down * jumpForce, ForceMode2D.Impulse);
+            }
+            else if (isGrounded)
+            {
+                jumpBufferCounter = inputBufferTime;
+                isJumping = true;
+                rb.AddForce(Vector2.up * jumpForce, ForceMode2D.Impulse);
+            }
         }
-        else if (context.canceled && rb.linearVelocity.y > 0)
+        else if (context.canceled && rb.linearVelocity.y > 0 && !isAttachedToCeiling)
         {
             rb.linearVelocity = new Vector2(rb.linearVelocity.x, rb.linearVelocity.y * 0.5f);
         }
@@ -222,5 +244,37 @@ public class PlayerController : MonoBehaviour
                 animator.SetTrigger("Idle");
             }
         }
+    }
+
+    private void CheckCeilingAttachment()
+    {
+        RaycastHit2D ceilingHit = Physics2D.Raycast(transform.position, Vector2.up, ceilingCheckDistance, groundLayer);
+        
+        // If we're attached to ceiling, check if we should detach
+        if (isAttachedToCeiling)
+        {
+            if (!ceilingHit || !ceilingHit.collider.CompareTag("Ground"))
+            {
+                DetachFromCeiling();
+            }
+        }
+        // If we're not attached, check if we can attach
+        else if (Input.GetKey(attachToCeilingKey) && ceilingHit && ceilingHit.collider.CompareTag("Ground"))
+        {
+            AttachToCeiling(ceilingHit.point);
+        }
+    }
+
+    private void AttachToCeiling(Vector2 attachPoint)
+    {
+        isAttachedToCeiling = true;
+        Vector2 newPosition = new Vector2(transform.position.x, attachPoint.y - ceilingDetachThreshold);
+        transform.position = newPosition;
+        rb.linearVelocity = new Vector2(rb.linearVelocity.x, 0f);
+    }
+
+    private void DetachFromCeiling()
+    {
+        isAttachedToCeiling = false;
     }
 }
