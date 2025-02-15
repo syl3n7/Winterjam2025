@@ -128,22 +128,22 @@ public class PlayerController : MonoBehaviour
         
         if (isAttachedToCeiling)
         {
-            // When on ceiling, maintain Y position and only allow X movement
-            cachedVelocity.x = moveInput.x * currentSpeed;
-            cachedVelocity.y = 0f;
+            // When on ceiling, only allow X movement
+            rb.linearVelocity = new Vector2(moveInput.x * currentSpeed, 0f);
             
-            // Keep the exact Y position while on ceiling
-            Vector2 position = transform.position;
-            position.y = transform.position.y;
-            transform.position = position;
+            // Explicitly maintain Y position
+            Vector3 pos = transform.position;
+            pos.y = transform.position.y; // Keep Y position constant
+            transform.position = pos;
+            
+            // Ensure Y movement is constrained
+            rb.constraints = RigidbodyConstraints2D.FreezeRotation | RigidbodyConstraints2D.FreezePositionY;
         }
         else
         {
-            cachedVelocity.x = moveInput.x * currentSpeed;
-            cachedVelocity.y = rb.velocity.y;
+            rb.constraints = RigidbodyConstraints2D.FreezeRotation;
+            rb.linearVelocity = new Vector2(moveInput.x * currentSpeed, rb.linearVelocity.y);
         }
-        
-        rb.velocity = cachedVelocity;
 
         // Handle facing direction
         if (moveInput.x != 0)
@@ -328,7 +328,10 @@ public class PlayerController : MonoBehaviour
         Vector2 newPosition = new Vector2(transform.position.x, 
             attachPoint.y - (colliderHeight / 2f) - ceilingDetachThreshold);
         transform.position = newPosition;
-        rb.velocity = Vector2.zero; // Reset velocity when attaching
+        
+        // Reset velocity and freeze Y position
+        rb.linearVelocity = Vector2.zero;
+        rb.constraints = RigidbodyConstraints2D.FreezeRotation | RigidbodyConstraints2D.FreezePositionY;
         
         StartCoroutine(FlipToCeiling());
     }
@@ -374,6 +377,8 @@ public class PlayerController : MonoBehaviour
         if (isFlipping) return;
         
         isAttachedToCeiling = false;
+        // Restore original constraints
+        rb.constraints = RigidbodyConstraints2D.FreezeRotation;
         StartCoroutine(FlipFromCeiling());
     }
 

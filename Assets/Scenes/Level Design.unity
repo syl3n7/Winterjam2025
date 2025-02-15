@@ -165360,10 +165360,6 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 71240024150879954, guid: 76957f06908ce440aa44c909254f5894, type: 3}
-      propertyPath: groundCheckRadius
-      value: 0.1
-      objectReference: {fileID: 0}
     - target: {fileID: 2014437728474623489, guid: 76957f06908ce440aa44c909254f5894, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0.57
@@ -165415,10 +165411,6 @@ PrefabInstance:
     - target: {fileID: 4300902565924106801, guid: 76957f06908ce440aa44c909254f5894, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 6776375101450746634, guid: 76957f06908ce440aa44c909254f5894, type: 3}
-      propertyPath: m_Mass
-      value: 50
       objectReference: {fileID: 0}
     - target: {fileID: 7139570953479690502, guid: 76957f06908ce440aa44c909254f5894, type: 3}
       propertyPath: near clip plane
