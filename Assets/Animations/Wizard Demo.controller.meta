@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 733669d2740ab8844bfabbf8a2ac6742
+guid: 3eb831fea75d0410a8bd238dc436b809
 NativeFormatImporter:
   externalObjects: {}
   mainObjectFileID: 0
@@ -11,5 +11,5 @@ AssetOrigin:
   productId: 155796
   packageName: Cute 2D Girl - Wizard
   packageVersion: 3.0
-  assetPath: Assets/Animations/Idle.anim
+  assetPath: Assets/Animations/Wizard Demo.controller
   uploadId: 413771
