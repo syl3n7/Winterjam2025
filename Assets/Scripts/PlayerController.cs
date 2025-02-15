@@ -125,19 +125,37 @@ public class PlayerController : MonoBehaviour
     private void HandleMovement()
     {
         float currentSpeed = isSprinting ? sprintSpeed : moveSpeed;
-        cachedVelocity.x = moveInput.x * currentSpeed;
         
         if (isAttachedToCeiling)
         {
+            // When on ceiling, maintain attachment position
+            Collider2D collider = GetComponent<Collider2D>();
+            float colliderHeight = collider != null ? collider.bounds.size.y : 1f;
+            
+            RaycastHit2D ceilingHit = Physics2D.Raycast(transform.position, Vector2.up, 
+                ceilingCheckDistance, groundLayer);
+            
+            if (ceilingHit)
+            {
+                // Update Y position to stay at correct distance from ceiling
+                Vector2 newPosition = transform.position;
+                newPosition.y = ceilingHit.point.y - (colliderHeight / 2f) - ceilingDetachThreshold;
+                transform.position = newPosition;
+            }
+            
+            // Apply horizontal movement
+            cachedVelocity.x = moveInput.x * currentSpeed;
             cachedVelocity.y = 0f;
         }
         else
         {
-            cachedVelocity.y = rb.linearVelocity.y;
+            cachedVelocity.x = moveInput.x * currentSpeed;
+            cachedVelocity.y = rb.velocity.y;
         }
         
-        rb.linearVelocity = cachedVelocity;
+        rb.velocity = cachedVelocity;
 
+        // Handle facing direction
         if (moveInput.x != 0)
         {
             bool shouldFaceRight = moveInput.x > 0;
@@ -313,12 +331,14 @@ public class PlayerController : MonoBehaviour
         if (isFlipping) return;
         
         isAttachedToCeiling = true;
-        Vector2 newPosition = new Vector2(transform.position.x, attachPoint.y - ceilingDetachThreshold);
+        
+        // Calculate position considering the collider height
+        Collider2D collider = GetComponent<Collider2D>();
+        float colliderHeight = collider != null ? collider.bounds.size.y : 1f;
+        Vector2 newPosition = new Vector2(transform.position.x, 
+            attachPoint.y - (colliderHeight / 2f) - ceilingDetachThreshold);
         transform.position = newPosition;
         rb.velocity = new Vector2(rb.velocity.x, 0f);
-        
-        // Invert gravity for all objects
-        GravityController.Instance.InvertGravity();
         
         // Start the flip animation
         StartCoroutine(FlipToCeiling());
