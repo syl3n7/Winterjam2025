@@ -128,24 +128,14 @@ public class PlayerController : MonoBehaviour
         
         if (isAttachedToCeiling)
         {
-            // When on ceiling, maintain attachment position
-            Collider2D collider = GetComponent<Collider2D>();
-            float colliderHeight = collider != null ? collider.bounds.size.y : 1f;
-            
-            RaycastHit2D ceilingHit = Physics2D.Raycast(transform.position, Vector2.up, 
-                ceilingCheckDistance, groundLayer);
-            
-            if (ceilingHit)
-            {
-                // Update Y position to stay at correct distance from ceiling
-                Vector2 newPosition = transform.position;
-                newPosition.y = ceilingHit.point.y - (colliderHeight / 2f) - ceilingDetachThreshold;
-                transform.position = newPosition;
-            }
-            
-            // Apply horizontal movement
+            // When on ceiling, maintain Y position and only allow X movement
             cachedVelocity.x = moveInput.x * currentSpeed;
             cachedVelocity.y = 0f;
+            
+            // Keep the exact Y position while on ceiling
+            Vector2 position = transform.position;
+            position.y = transform.position.y;
+            transform.position = position;
         }
         else
         {
@@ -338,9 +328,8 @@ public class PlayerController : MonoBehaviour
         Vector2 newPosition = new Vector2(transform.position.x, 
             attachPoint.y - (colliderHeight / 2f) - ceilingDetachThreshold);
         transform.position = newPosition;
-        rb.velocity = new Vector2(rb.velocity.x, 0f);
+        rb.velocity = Vector2.zero; // Reset velocity when attaching
         
-        // Start the flip animation
         StartCoroutine(FlipToCeiling());
     }
 
@@ -385,10 +374,6 @@ public class PlayerController : MonoBehaviour
         if (isFlipping) return;
         
         isAttachedToCeiling = false;
-        
-        // Restore normal gravity
-        GravityController.Instance.InvertGravity();
-        
         StartCoroutine(FlipFromCeiling());
     }
 

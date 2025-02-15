@@ -1167,7 +1167,7 @@ Rigidbody2D:
   m_Simulated: 1
   m_UseFullKinematicContacts: 0
   m_UseAutoMass: 0
-  m_Mass: 40
+  m_Mass: 50
   m_LinearDamping: 0
   m_AngularDamping: 0.05
   m_GravityScale: 3
@@ -1196,7 +1196,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   moveSpeed: 5
   sprintSpeed: 8
-  jumpForce: 15
+  jumpForce: 15.5
   groundCheckRadius: 0.2
   groundLayer:
     serializedVersion: 2
@@ -1205,7 +1205,8 @@ MonoBehaviour:
   ceilingCheckDistance: 2
   ceilingDetachThreshold: 0.1
   attachToCeilingKey: 304
-  inputBufferTime: 0.2
+  flipDuration: 0.5
+  inputBufferTime: 0.5
 --- !u!114 &2444067639130913123
 MonoBehaviour:
   m_ObjectHideFlags: 0
