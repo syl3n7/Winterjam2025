@@ -19,9 +19,12 @@ public class EnemyPatrol : MonoBehaviour
     [SerializeField] private int maxHealth = 3;
     [SerializeField] private int damageAmount = 1;
     [SerializeField] private float damageInterval = 0.7f;
+    [SerializeField] private float knockbackForce = 3f;
+    [SerializeField] private float knockbackDuration = 0.2f;
     private int currentHealth;
     private float damageTimer;
     private bool canDealDamage = true;
+    private bool isKnockedBack;
 
     private Vector3 currentTarget;
     private Rigidbody2D rb;
@@ -193,6 +196,8 @@ public class EnemyPatrol : MonoBehaviour
 
     public void TakeDamage(int damage)
     {
+        if (isKnockedBack) return;
+        
         currentHealth -= damage;
         
         if (damageFlash != null)
@@ -200,9 +205,36 @@ public class EnemyPatrol : MonoBehaviour
             damageFlash.Flash();
         }
         
+        // Apply knockback
+        StartCoroutine(ApplyKnockback());
+        
         if (currentHealth <= 0)
         {
             Die();
+        }
+    }
+
+    private IEnumerator ApplyKnockback()
+    {
+        isKnockedBack = true;
+        
+        // Store current state
+        EnemyState previousState = currentState;
+        currentState = EnemyState.WaitingAtLastSeen;
+        
+        // Calculate knockback direction (opposite of current facing direction)
+        float direction = isFacingRight ? -1f : 1f;
+        
+        // Apply knockback force
+        rb.velocity = new Vector2(direction * knockbackForce, rb.velocity.y + 1f);
+        
+        yield return new WaitForSeconds(knockbackDuration);
+        
+        // Reset state
+        isKnockedBack = false;
+        if (previousState != EnemyState.WaitingAtLastSeen)
+        {
+            currentState = previousState;
         }
     }
 
