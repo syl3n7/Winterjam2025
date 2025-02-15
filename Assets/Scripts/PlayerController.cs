@@ -529,7 +529,7 @@ public class PlayerController : MonoBehaviour
         float direction = isFacingRight ? -1f : 1f;
         
         // Apply the knockback force
-        rb.linearVelocity = new Vector2(direction * knockbackForce, rb.linearVelocity.y + 2f);
+        rb.velocity = new Vector2(direction * knockbackForce, rb.velocity.y + 2f);
         
         // Briefly disable player input
         inputActions.Disable();
