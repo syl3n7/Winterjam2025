@@ -324,6 +324,52 @@ Transform:
   - {fileID: 1498377125}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &357027945
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 357027947}
+  - component: {fileID: 357027946}
+  m_Layer: 0
+  m_Name: GravityController
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &357027946
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 357027945}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 888b76a6be2b84a80acc3d1eb7131cc3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  normalGravityScale: 3
+  invertedGravityScale: -3
+--- !u!4 &357027947
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 357027945}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -3.5128756, y: 0.43495858, z: 0.040558096}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &425203015
 GameObject:
   m_ObjectHideFlags: 0
@@ -165314,10 +165360,6 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 71240024150879954, guid: 76957f06908ce440aa44c909254f5894, type: 3}
-      propertyPath: jumpForce
-      value: 15.5
-      objectReference: {fileID: 0}
     - target: {fileID: 2014437728474623489, guid: 76957f06908ce440aa44c909254f5894, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0.57
@@ -165370,10 +165412,6 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 6776375101450746634, guid: 76957f06908ce440aa44c909254f5894, type: 3}
-      propertyPath: m_Mass
-      value: 50
-      objectReference: {fileID: 0}
     - target: {fileID: 7139570953479690502, guid: 76957f06908ce440aa44c909254f5894, type: 3}
       propertyPath: near clip plane
       value: 0.01
@@ -165409,3 +165447,4 @@ SceneRoots:
   - {fileID: 47309023}
   - {fileID: 272538054}
   - {fileID: 4285143243134324354}
+  - {fileID: 357027947}

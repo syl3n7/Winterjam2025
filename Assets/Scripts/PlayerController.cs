@@ -125,19 +125,27 @@ public class PlayerController : MonoBehaviour
     private void HandleMovement()
     {
         float currentSpeed = isSprinting ? sprintSpeed : moveSpeed;
-        cachedVelocity.x = moveInput.x * currentSpeed;
         
         if (isAttachedToCeiling)
         {
-            cachedVelocity.y = 0f;
+            // When on ceiling, only allow X movement
+            rb.linearVelocity = new Vector2(moveInput.x * currentSpeed, 0f);
+            
+            // Explicitly maintain Y position
+            Vector3 pos = transform.position;
+            pos.y = transform.position.y; // Keep Y position constant
+            transform.position = pos;
+            
+            // Ensure Y movement is constrained
+            rb.constraints = RigidbodyConstraints2D.FreezeRotation | RigidbodyConstraints2D.FreezePositionY;
         }
         else
         {
-            cachedVelocity.y = rb.linearVelocity.y;
+            rb.constraints = RigidbodyConstraints2D.FreezeRotation;
+            rb.linearVelocity = new Vector2(moveInput.x * currentSpeed, rb.linearVelocity.y);
         }
-        
-        rb.linearVelocity = cachedVelocity;
 
+        // Handle facing direction
         if (moveInput.x != 0)
         {
             bool shouldFaceRight = moveInput.x > 0;
@@ -175,16 +183,33 @@ public class PlayerController : MonoBehaviour
     {
         if (wizAnimator != null)
         {
+            // Handle running animation for both ground and ceiling
             if (Mathf.Abs(moveInput.x) > 0.1f)
             {
-                wizAnimator.Run();
+                if (isAttachedToCeiling)
+                {
+                    // Optional: You could create a specific ceiling-run animation
+                    wizAnimator.Run();
+                    wizAnimator.LookUp(); // Maintain the upward look while running
+                }
+                else
+                {
+                    wizAnimator.Run();
+                }
             }
             else
             {
-                wizAnimator.Idle();
+                if (isAttachedToCeiling)
+                {
+                    wizAnimator.LookUp();
+                }
+                else
+                {
+                    wizAnimator.Idle();
+                }
             }
 
-            if (isJumping)
+            if (isJumping && !isAttachedToCeiling)
             {
                 wizAnimator.Jump();
             }
@@ -192,12 +217,6 @@ public class PlayerController : MonoBehaviour
             if (isAttacking)
             {
                 wizAnimator.Attack();
-            }
-
-            // Optional: Add ceiling check animation
-            if (isAttachedToCeiling)
-            {
-                wizAnimator.LookUp();
             }
         }
     }
@@ -313,14 +332,17 @@ public class PlayerController : MonoBehaviour
         if (isFlipping) return;
         
         isAttachedToCeiling = true;
-        Vector2 newPosition = new Vector2(transform.position.x, attachPoint.y - ceilingDetachThreshold);
+        
+        // More precise position calculation
+        Collider2D collider = GetComponent<Collider2D>();
+        float colliderHeight = collider != null ? collider.bounds.size.y : 1f;
+        Vector2 newPosition = new Vector2(transform.position.x, 
+            attachPoint.y - (colliderHeight * 0.5f) - 0.01f); // Tiny offset to ensure contact
         transform.position = newPosition;
-        rb.velocity = new Vector2(rb.velocity.x, 0f);
         
-        // Invert gravity for all objects
-        GravityController.Instance.InvertGravity();
+        rb.linearVelocity = Vector2.zero;
+        rb.constraints = RigidbodyConstraints2D.FreezeRotation | RigidbodyConstraints2D.FreezePositionY;
         
-        // Start the flip animation
         StartCoroutine(FlipToCeiling());
     }
 
@@ -330,31 +352,30 @@ public class PlayerController : MonoBehaviour
         flipProgress = 0f;
         startRotation = transform.rotation;
         targetRotation = Quaternion.Euler(0, 0, 180f);
+        Vector3 startPosition = transform.position;
         
-        // Temporarily disable physics during flip
         rb.simulated = false;
         
         while (flipProgress < 1f)
         {
             flipProgress += Time.deltaTime / flipDuration;
-            
-            // Use SmoothStep for easier in/out animation
             float smoothProgress = Mathf.SmoothStep(0, 1, flipProgress);
             
-            // Interpolate rotation with a slight arc effect
+            // Rotation
             float currentAngle = Mathf.LerpAngle(0, 180, smoothProgress);
             transform.rotation = Quaternion.Euler(0, 0, currentAngle);
             
-            // Add a small upward arc during the flip
-            float arcHeight = Mathf.Sin(smoothProgress * Mathf.PI) * 0.5f;
-            Vector3 currentPos = transform.position;
-            currentPos.y += arcHeight * Time.deltaTime;
-            transform.position = currentPos;
+            // Improved arc movement
+            float arcHeight = Mathf.Sin(smoothProgress * Mathf.PI) * 0.3f; // Reduced arc height
+            Vector3 newPosition = startPosition;
+            newPosition.y += arcHeight;
+            transform.position = newPosition;
             
             yield return null;
         }
         
-        // Ensure we end up exactly at the target rotation
+        // Snap to exact ceiling position
+        transform.position = startPosition;
         transform.rotation = targetRotation;
         rb.simulated = true;
         isFlipping = false;
@@ -365,10 +386,8 @@ public class PlayerController : MonoBehaviour
         if (isFlipping) return;
         
         isAttachedToCeiling = false;
-        
-        // Restore normal gravity
-        GravityController.Instance.InvertGravity();
-        
+        // Restore original constraints
+        rb.constraints = RigidbodyConstraints2D.FreezeRotation;
         StartCoroutine(FlipFromCeiling());
     }
 
