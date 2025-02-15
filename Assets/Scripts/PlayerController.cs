@@ -66,6 +66,12 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float knockbackDuration = 0.2f;
     private bool isKnockedBack;
 
+    [Header("Ammo")]
+    [SerializeField] private int currentAmmo = 0;
+    [SerializeField] private float pickupRadius = 1f;
+    [SerializeField] private LayerMask stalactiteLayer; // Changed from thorneLayer
+    private AmmoUI ammoUI;
+
     [Header("Input Buffer")]
     [SerializeField] private float inputBufferTime = 0.2f;
     private float jumpBufferCounter;
@@ -97,6 +103,12 @@ public class PlayerController : MonoBehaviour
             GameObject spawnPoint = new GameObject("RespawnPoint");
             spawnPoint.transform.position = transform.position;
             respawnPoint = spawnPoint.transform;
+        }
+
+        ammoUI = FindObjectOfType<AmmoUI>();
+        if (ammoUI != null)
+        {
+            ammoUI.UpdateAmmoText(currentAmmo);
         }
     }
 
@@ -137,6 +149,7 @@ public class PlayerController : MonoBehaviour
         HandleMovement();
         HandleJumpBuffer();
         UpdateAnimator();
+        CheckAmmoPickup();
     }
 
     private void Update()
@@ -308,16 +321,28 @@ public class PlayerController : MonoBehaviour
 
     private void ShootProjectile()
     {
-        if (projectilePrefab != null && firePoint != null)
+        if (projectilePrefab != null && firePoint != null && currentAmmo > 0)
         {
+            currentAmmo--;
             GameObject projectile = Instantiate(projectilePrefab, firePoint.position, Quaternion.identity);
+            Rigidbody2D projectileRb = projectile.GetComponent<Rigidbody2D>();
             
-            // Flip projectile direction based on player facing direction
-            if (!isFacingRight)
+            if (projectileRb != null)
             {
+                // Set the direction based on facing direction
+                float direction = isFacingRight ? 1f : -1f;
+                projectileRb.velocity = new Vector2(direction * 10f, 0f); // Adjust speed (10f) as needed
+                
+                // Flip sprite if needed
                 Vector3 scale = projectile.transform.localScale;
-                scale.x *= -1;
+                scale.x *= direction;
                 projectile.transform.localScale = scale;
+            }
+
+            // Update UI
+            if (ammoUI != null)
+            {
+                ammoUI.UpdateAmmoText(currentAmmo);
             }
         }
     }
@@ -591,6 +616,25 @@ public class PlayerController : MonoBehaviour
     public void SetRespawnPoint(Transform newRespawnPoint)
     {
         respawnPoint = newRespawnPoint;
+    }
+
+    private void CheckAmmoPickup()
+    {
+        Collider2D[] hitColliders = Physics2D.OverlapCircleAll(transform.position, pickupRadius, stalactiteLayer);
+        foreach (Collider2D collider in hitColliders)
+        {
+            // Add ammo
+            currentAmmo++;
+            
+            // Update UI
+            if (ammoUI != null)
+            {
+                ammoUI.UpdateAmmoText(currentAmmo);
+            }
+            
+            // Destroy pickup
+            Destroy(collider.gameObject);
+        }
     }
 
     private void OnDrawGizmos()

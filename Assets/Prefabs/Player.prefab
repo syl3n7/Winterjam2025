@@ -1074,6 +1074,13 @@ MonoBehaviour:
   projectilePrefab: {fileID: 9185554378593482824, guid: fef2ab1f5c4bd442782976144c7532ce, type: 3}
   firePoint: {fileID: 6257375600302197865}
   attackCooldown: 0.5
+  knockbackForce: 5
+  knockbackDuration: 0.2
+  currentAmmo: 0
+  pickupRadius: 1
+  stalactiteLayer:
+    serializedVersion: 2
+    m_Bits: 512
   inputBufferTime: 0.5
 --- !u!114 &2444067639130913123
 MonoBehaviour:
