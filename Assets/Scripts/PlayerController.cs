@@ -39,6 +39,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private int maxHealth = 3;
     [SerializeField] private Transform respawnPoint;
     private int currentHealth;
+    public int MaxHealth => maxHealth;
 
     [Header("States")]
     private bool isJumping;
@@ -504,6 +505,13 @@ public class PlayerController : MonoBehaviour
         if (damageFlash != null)
         {
             damageFlash.Flash();
+        }
+
+        // Notify health UI
+        HealthUI healthUI = FindObjectOfType<HealthUI>();
+        if (healthUI != null)
+        {
+            healthUI.UpdateHearts(currentHealth);
         }
 
         if (currentHealth <= 0)
