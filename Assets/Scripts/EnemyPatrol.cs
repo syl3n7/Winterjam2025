@@ -5,22 +5,44 @@ public class EnemyPatrol : MonoBehaviour
     [Header("Patrol Settings")]
     [SerializeField] private Transform pointA;
     [SerializeField] private Transform pointB;
-    [SerializeField] private float moveSpeed = 3f; 
+    [SerializeField] private float patrolSpeed = 3f;
+    [SerializeField] private float chaseSpeed = 7f;
     [SerializeField] private bool startAtPointA = true;
 
     [Header("Detection")]
     [SerializeField] private float detectionRadius = 5f;
     [SerializeField] private LayerMask playerLayer;
+    [SerializeField] private float waitTimeAfterChase = 3f;
+    [SerializeField] private float accelerationTime = 0.5f;
+
+    [Header("Combat")]
+    [SerializeField] private int maxHealth = 3;
+    private int currentHealth;
 
     private Vector3 currentTarget;
     private Rigidbody2D rb;
     private bool isFacingRight = true;
+    private Transform player;
+    private float currentSpeed;
+    private float waitTimer;
+    private bool isWaitingAfterChase;
+    private Vector3 lastKnownPlayerPosition;
+    private EnemyState currentState = EnemyState.Patrolling;
+
+    private enum EnemyState
+    {
+        Patrolling,
+        Chasing,
+        WaitingAtLastSeen
+    }
 
     private void Start()
     {
         rb = GetComponent<Rigidbody2D>();
         rb.constraints = RigidbodyConstraints2D.FreezeRotation;
         currentTarget = startAtPointA ? pointB.position : pointA.position;
+        currentSpeed = patrolSpeed;
+        currentHealth = maxHealth;
 
         if (pointA == null || pointB == null)
         {
@@ -33,29 +55,124 @@ public class EnemyPatrol : MonoBehaviour
     {
         // Check for player in detection radius
         Collider2D playerCollider = Physics2D.OverlapCircle(transform.position, detectionRadius, playerLayer);
-        if (playerCollider != null)
+
+        switch (currentState)
         {
-            // Player detected - handle accordingly
-            // You can add chase behavior here later
-            return;
+            case EnemyState.Patrolling:
+                if (playerCollider != null)
+                {
+                    currentState = EnemyState.Chasing;
+                    player = playerCollider.transform;
+                    StartCoroutine(AccelerateToChaseSpeed());
+                }
+                else
+                {
+                    PatrolBehavior();
+                }
+                break;
+
+            case EnemyState.Chasing:
+                if (playerCollider != null)
+                {
+                    lastKnownPlayerPosition = player.position;
+                    ChasePlayer();
+                }
+                else
+                {
+                    currentState = EnemyState.WaitingAtLastSeen;
+                    waitTimer = waitTimeAfterChase;
+                }
+                break;
+
+            case EnemyState.WaitingAtLastSeen:
+                if (playerCollider != null)
+                {
+                    currentState = EnemyState.Chasing;
+                    player = playerCollider.transform;
+                }
+                else
+                {
+                    waitTimer -= Time.deltaTime;
+                    if (waitTimer <= 0)
+                    {
+                        currentState = EnemyState.Patrolling;
+                        StartCoroutine(DecelerateToPatrolSpeed());
+                    }
+                }
+                break;
         }
 
-        // Move towards current target
+        UpdateFacing();
+    }
+
+    private void PatrolBehavior()
+    {
         Vector2 direction = (currentTarget - transform.position).normalized;
-        rb.linearVelocity = new Vector2(direction.x * moveSpeed, rb.linearVelocity.y);
+        rb.linearVelocity = new Vector2(direction.x * currentSpeed, rb.linearVelocity.y);
 
-        // Update facing direction
-        if (direction.x > 0 && !isFacingRight)
-            Flip();
-        else if (direction.x < 0 && isFacingRight)
-            Flip();
-
-        // Check if reached target
-        if (Vector2.Distance(new Vector2(transform.position.x, 0), 
+        if (Vector2.Distance(new Vector2(transform.position.x, 0),
                            new Vector2(currentTarget.x, 0)) < 0.1f)
         {
             currentTarget = currentTarget == pointA.position ? pointB.position : pointA.position;
         }
+    }
+
+    private void ChasePlayer()
+    {
+        Vector2 direction = (player.position - transform.position).normalized;
+        rb.linearVelocity = new Vector2(direction.x * currentSpeed, rb.linearVelocity.y);
+    }
+
+    private void UpdateFacing()
+    {
+        if (rb.linearVelocity.x > 0 && !isFacingRight)
+            Flip();
+        else if (rb.linearVelocity.x < 0 && isFacingRight)
+            Flip();
+    }
+
+    private System.Collections.IEnumerator AccelerateToChaseSpeed()
+    {
+        float[] speedSteps = { 3f, 5f, 5.5f, 6f, 7f };
+        float stepDuration = accelerationTime / (speedSteps.Length - 1);
+        
+        for (int i = 0; i < speedSteps.Length - 1; i++)
+        {
+            float startStepSpeed = speedSteps[i];
+            float targetStepSpeed = speedSteps[i + 1];
+            float elapsedTime = 0f;
+            
+            while (elapsedTime < stepDuration)
+            {
+                elapsedTime += Time.deltaTime;
+                currentSpeed = Mathf.Lerp(startStepSpeed, targetStepSpeed, elapsedTime / stepDuration);
+                yield return null;
+            }
+        }
+        
+        currentSpeed = chaseSpeed;
+    }
+
+    private System.Collections.IEnumerator DecelerateToPatrolSpeed()
+    {
+        float[] speedSteps = { 7f, 6f, 5.5f, 5f, 3f };
+        float stepDuration = accelerationTime / (speedSteps.Length - 1);
+        
+        for (int i = 0; i < speedSteps.Length - 1; i++)
+        {
+            float startStepSpeed = speedSteps[i];
+            float targetStepSpeed = speedSteps[i + 1];
+            float elapsedTime = 0f;
+            
+            while (elapsedTime < stepDuration)
+            {
+                elapsedTime += Time.deltaTime;
+                currentSpeed = Mathf.Lerp(startStepSpeed, targetStepSpeed, elapsedTime / stepDuration);
+                yield return null;
+            }
+        }
+        
+        currentSpeed = patrolSpeed;
     }
 
     private void Flip()
@@ -64,6 +181,22 @@ public class EnemyPatrol : MonoBehaviour
         Vector3 scale = transform.localScale;
         scale.x *= -1;
         transform.localScale = scale;
+    }
+
+    public void TakeDamage(int damage)
+    {
+        currentHealth -= damage;
+        
+        if (currentHealth <= 0)
+        {
+            Die();
+        }
+    }
+
+    private void Die()
+    {
+        // Add death animation here if you have one
+        Destroy(gameObject);
     }
 
     private void OnDrawGizmos()

@@ -35,6 +35,11 @@ public class PlayerController : MonoBehaviour
     private Quaternion startRotation;
     private Quaternion targetRotation;
 
+    [Header("Health & Respawn")]
+    [SerializeField] private int maxHealth = 3;
+    [SerializeField] private Transform respawnPoint;
+    private int currentHealth;
+
     [Header("States")]
     private bool isJumping;
     private bool isGrounded;
@@ -47,6 +52,12 @@ public class PlayerController : MonoBehaviour
     private Rigidbody2D rb;
     private Animator animator;
     private WizDemo1 wizAnimator;
+
+    [Header("Combat")]
+    [SerializeField] private GameObject projectilePrefab;
+    [SerializeField] private Transform firePoint;
+    [SerializeField] private float attackCooldown = 0.5f;
+    private float attackTimer;
 
     [Header("Input Buffer")]
     [SerializeField] private float inputBufferTime = 0.2f;
@@ -67,6 +78,18 @@ public class PlayerController : MonoBehaviour
         sprintAction = inputActions.Player.Sprint;
         
         rb.constraints = RigidbodyConstraints2D.FreezeRotation;
+    }
+
+    private void Start()
+    {
+        currentHealth = maxHealth;
+        if (respawnPoint == null)
+        {
+            // Create a new respawn point GameObject if none is assigned
+            GameObject spawnPoint = new GameObject("RespawnPoint");
+            spawnPoint.transform.position = transform.position;
+            respawnPoint = spawnPoint.transform;
+        }
     }
 
     private void OnEnable()
@@ -106,6 +129,15 @@ public class PlayerController : MonoBehaviour
         HandleMovement();
         HandleJumpBuffer();
         UpdateAnimator();
+    }
+
+    private void Update()
+    {
+        if (attackTimer > 0)
+        {
+            attackTimer -= Time.deltaTime;
+        }
+        // ...existing code...
     }
 
     private void CheckGrounded()
@@ -258,9 +290,27 @@ public class PlayerController : MonoBehaviour
 
     private void OnAttack(InputAction.CallbackContext context)
     {
-        if (context.performed)
+        if (context.performed && attackTimer <= 0)
         {
             isAttacking = true;
+            ShootProjectile();
+            attackTimer = attackCooldown;
+        }
+    }
+
+    private void ShootProjectile()
+    {
+        if (projectilePrefab != null && firePoint != null)
+        {
+            GameObject projectile = Instantiate(projectilePrefab, firePoint.position, Quaternion.identity);
+            
+            // Flip projectile direction based on player facing direction
+            if (!isFacingRight)
+            {
+                Vector3 scale = projectile.transform.localScale;
+                scale.x *= -1;
+                projectile.transform.localScale = scale;
+            }
         }
     }
 
@@ -424,6 +474,14 @@ public class PlayerController : MonoBehaviour
 
     public void TakeDamage()
     {
+        currentHealth--;
+    
+        if (currentHealth <= 0)
+        {
+            Die();
+            return;
+        }
+
         if (wizAnimator != null)
         {
             wizAnimator.Hurt();
@@ -436,6 +494,42 @@ public class PlayerController : MonoBehaviour
         {
             wizAnimator.Die();
         }
+        StartCoroutine(RespawnSequence());
+    }
+
+    private IEnumerator RespawnSequence()
+    {
+        inputActions.Disable();
+        rb.simulated = false;
+        
+        yield return new WaitForSeconds(1f);
+        
+        // Use the Transform's position
+        transform.position = respawnPoint.position;
+        currentHealth = maxHealth;
+        transform.rotation = Quaternion.identity;
+        
+        // Reset states
+        isAttachedToCeiling = false;
+        isFlipping = false;
+        isJumping = false;
+        isAttacking = false;
+        
+        // Re-enable player
+        rb.simulated = true;
+        rb.linearVelocity = Vector2.zero;
+        inputActions.Enable();
+        
+        if (wizAnimator != null)
+        {
+            wizAnimator.Idle();
+        }
+    }
+
+    // Optional: Add method to set new respawn point (for checkpoints)
+    public void SetRespawnPoint(Transform newRespawnPoint)
+    {
+        respawnPoint = newRespawnPoint;
     }
 
     private void OnDrawGizmos()
