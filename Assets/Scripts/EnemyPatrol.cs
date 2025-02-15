@@ -137,10 +137,29 @@ public class EnemyPatrol : MonoBehaviour
 
     private void UpdateFacing()
     {
-        if (rb.linearVelocity.x > 0 && !isFacingRight)
+        Vector3 targetPosition;
+        switch (currentState)
+        {
+            case EnemyState.Patrolling:
+                targetPosition = currentTarget;
+                break;
+            case EnemyState.Chasing:
+                targetPosition = player.position;
+                break;
+            case EnemyState.WaitingAtLastSeen:
+                targetPosition = lastKnownPlayerPosition;
+                break;
+            default:
+                return;
+        }
+
+        // Reversed the logic here (added the '!')
+        bool shouldFaceRight = !(targetPosition.x > transform.position.x);
+        
+        if (shouldFaceRight != isFacingRight)
+        {
             Flip();
-        else if (rb.linearVelocity.x < 0 && isFacingRight)
-            Flip();
+        }
     }
 
     private System.Collections.IEnumerator AccelerateToChaseSpeed()
