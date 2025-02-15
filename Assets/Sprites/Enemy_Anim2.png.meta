@@ -1,22 +1,88 @@
 fileFormatVersion: 2
-guid: 17be5be38deea4fc3bf74eae372eb938
+guid: 906f83e5529bf104db01c5d09d29df18
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -5788217657642723639
-    second: BVF6ZgQ_0
+      213: 2894007673160456447
+    second: Enemy_Anim2_0
   - first:
-      213: 7680674098978699436
-    second: BVF6ZgQ_1
+      213: -7927064582934773068
+    second: Enemy_Anim2_1
   - first:
-      213: -435118162934996134
-    second: BVF6ZgQ_2
+      213: 1950569290162807368
+    second: Enemy_Anim2_2
   - first:
-      213: -224240221865345345
-    second: BVF6ZgQ_3
+      213: -5001145246067572450
+    second: Enemy_Anim2_3
   - first:
-      213: 625330619035420638
-    second: BVF6ZgQ_4
+      213: 7329653011947904070
+    second: Enemy_Anim2_4
+  - first:
+      213: -4010777703852032027
+    second: Enemy_Anim2_5
+  - first:
+      213: -7245322396212855224
+    second: Enemy_Anim2_6
+  - first:
+      213: -2245907679753777607
+    second: Enemy_Anim2_7
+  - first:
+      213: -2698300476078067199
+    second: Enemy_Anim2_8
+  - first:
+      213: -1982748251036885311
+    second: Enemy_Anim2_9
+  - first:
+      213: 8897894564861059145
+    second: Enemy_Anim2_10
+  - first:
+      213: 3916786893071008639
+    second: Enemy_Anim2_11
+  - first:
+      213: -481801885892853332
+    second: Enemy_Anim2_12
+  - first:
+      213: 8485284457715067696
+    second: Enemy_Anim2_13
+  - first:
+      213: 308985023388546254
+    second: Enemy_Anim2_14
+  - first:
+      213: -7223186541025471169
+    second: Enemy_Anim2_15
+  - first:
+      213: -4017857282380639598
+    second: Enemy_Anim2_16
+  - first:
+      213: -2566920335489117689
+    second: Enemy_Anim2_17
+  - first:
+      213: -1044482824155177386
+    second: Enemy_Anim2_18
+  - first:
+      213: -5913063100532222305
+    second: Enemy_Anim2_19
+  - first:
+      213: 8790058888064211586
+    second: Enemy_Anim2_20
+  - first:
+      213: -8089809622610861292
+    second: Enemy_Anim2_21
+  - first:
+      213: -7094517914534708490
+    second: Enemy_Anim2_22
+  - first:
+      213: -640627199523711681
+    second: Enemy_Anim2_23
+  - first:
+      213: 4491254518375279301
+    second: Enemy_Anim2_24
+  - first:
+      213: 8053082560483442209
+    second: Enemy_Anim2_25
+  - first:
+      213: 6247940325177086666
+    second: Enemy_Anim2_26
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -63,7 +129,7 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 100
+  spritePixelsToUnits: 140
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -108,154 +174,71 @@ TextureImporter:
     ignorePlatformSupport: 0
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
-  - serializedVersion: 4
-    buildTarget: Android
-    maxTextureSize: 2048
-    resizeAlgorithm: 0
-    textureFormat: -1
-    textureCompression: 1
-    compressionQuality: 50
-    crunchedCompression: 0
-    allowsAlphaSplitting: 0
-    overridden: 0
-    ignorePlatformSupport: 0
-    androidETC2FallbackOverride: 0
-    forceMaximumCompressionQuality_BC6H_BC7: 0
-  - serializedVersion: 4
-    buildTarget: WebGL
-    maxTextureSize: 2048
-    resizeAlgorithm: 0
-    textureFormat: -1
-    textureCompression: 1
-    compressionQuality: 50
-    crunchedCompression: 0
-    allowsAlphaSplitting: 0
-    overridden: 0
-    ignorePlatformSupport: 0
-    androidETC2FallbackOverride: 0
-    forceMaximumCompressionQuality_BC6H_BC7: 0
-  - serializedVersion: 4
-    buildTarget: iOS
-    maxTextureSize: 2048
-    resizeAlgorithm: 0
-    textureFormat: -1
-    textureCompression: 1
-    compressionQuality: 50
-    crunchedCompression: 0
-    allowsAlphaSplitting: 0
-    overridden: 0
-    ignorePlatformSupport: 0
-    androidETC2FallbackOverride: 0
-    forceMaximumCompressionQuality_BC6H_BC7: 0
   spriteSheet:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: BVF6ZgQ_0
+      name: Enemy_1
       rect:
         serializedVersion: 2
-        x: 14
-        y: 229
-        width: 8
-        height: 9
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 9c6df8925be1cafa0800000000000000
-      internalID: -5788217657642723639
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: BVF6ZgQ_1
-      rect:
-        serializedVersion: 2
-        x: 42
+        x: 0
         y: 0
-        width: 329
-        height: 351
+        width: 384
+        height: 384
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: -1
+      tessellationDetail: 0
       bones: []
-      spriteID: ca83b29266c379a60800000000000000
-      internalID: 7680674098978699436
+      spriteID: 83f8249f1c1f72d4d87a58ea10eba421
+      internalID: 2894007673160456447
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: BVF6ZgQ_2
+      name: Enemy_2
       rect:
         serializedVersion: 2
-        x: 11
-        y: 209
-        width: 8
-        height: 9
+        x: 384
+        y: 0
+        width: 384
+        height: 384
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: -1
+      tessellationDetail: 0
       bones: []
-      spriteID: a5360fe065626f9f0800000000000000
-      internalID: -435118162934996134
+      spriteID: 2f84c151fa27c1240a5ca31189da77f6
+      internalID: -7927064582934773068
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: BVF6ZgQ_3
+      name: Enemy_3
       rect:
         serializedVersion: 2
-        x: 12
-        y: 216
-        width: 8
-        height: 11
+        x: 768
+        y: 0
+        width: 384
+        height: 384
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: -1
+      tessellationDetail: 0
       bones: []
-      spriteID: fbe7c5fc4b653ecf0800000000000000
-      internalID: -224240221865345345
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: BVF6ZgQ_4
-      rect:
-        serializedVersion: 2
-        x: 365
-        y: 165
-        width: 7
-        height: 12
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: ed708c682ee9da800800000000000000
-      internalID: 625330619035420638
+      spriteID: 5608202974dcc7641aa6bf98f838b561
+      internalID: 1950569290162807368
       vertices: []
       indices: 
       edges: []
@@ -264,7 +247,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 
+    spriteID: 9258393ec88a91a4aa20d691dd51dc08
     internalID: 0
     vertices: []
     indices: 
@@ -274,11 +257,9 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      BVF6ZgQ_0: -5788217657642723639
-      BVF6ZgQ_1: 7680674098978699436
-      BVF6ZgQ_2: -435118162934996134
-      BVF6ZgQ_3: -224240221865345345
-      BVF6ZgQ_4: 625330619035420638
+      Enemy_1: 2894007673160456447
+      Enemy_2: -7927064582934773068
+      Enemy_3: 1950569290162807368
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
