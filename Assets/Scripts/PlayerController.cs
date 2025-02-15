@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using ClearSky;
 
 public class PlayerController : MonoBehaviour
 {
@@ -39,6 +40,7 @@ public class PlayerController : MonoBehaviour
     [Header("Components")]
     private Rigidbody2D rb;
     private Animator animator;
+    private WizDemo1 wizAnimator;
 
     [Header("Input Buffer")]
     [SerializeField] private float inputBufferTime = 0.2f;
@@ -48,6 +50,7 @@ public class PlayerController : MonoBehaviour
     {
         rb = GetComponent<Rigidbody2D>();
         animator = GetComponent<Animator>();
+        wizAnimator = GetComponent<WizDemo1>();
         playerInput = GetComponent<PlayerInput>();
         
         inputActions = new InputSystem_Actions();  
@@ -101,10 +104,14 @@ public class PlayerController : MonoBehaviour
 
     private void CheckGrounded()
     {
+        bool wasGrounded = isGrounded;
         isGrounded = Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, groundLayer);
-        if (isGrounded)
+        
+        // Only reset jumping if we've actually landed
+        if (isGrounded && !wasGrounded)
         {
             isJumping = false;
+            Debug.Log("Landed on ground");
         }
     }
 
@@ -139,10 +146,12 @@ public class PlayerController : MonoBehaviour
         if (jumpBufferCounter > 0)
         {
             jumpBufferCounter -= Time.deltaTime;
-            if (isGrounded)
+            if (isGrounded && !isJumping) // Added !isJumping check
             {
-                rb.AddForce(Vector2.up * jumpForce, ForceMode2D.Impulse);
+                rb.linearVelocity = Vector2.up * jumpForce;
                 jumpBufferCounter = 0;
+                isJumping = true;
+                Debug.Log("Buffer jump executed");
             }
         }
     }
@@ -157,11 +166,32 @@ public class PlayerController : MonoBehaviour
 
     private void UpdateAnimator()
     {
-        if (animator != null)
+        if (wizAnimator != null)
         {
-            animator.SetFloat("Speed", Mathf.Abs(moveInput.x));
-            animator.SetBool("IsGrounded", isGrounded);
-            animator.SetBool("IsJumping", isJumping);
+            if (Mathf.Abs(moveInput.x) > 0.1f)
+            {
+                wizAnimator.Run();
+            }
+            else
+            {
+                wizAnimator.Idle();
+            }
+
+            if (isJumping)
+            {
+                wizAnimator.Jump();
+            }
+
+            if (isAttacking)
+            {
+                wizAnimator.Attack();
+            }
+
+            // Optional: Add ceiling check animation
+            if (isAttachedToCeiling)
+            {
+                wizAnimator.LookUp();
+            }
         }
     }
 
@@ -179,18 +209,23 @@ public class PlayerController : MonoBehaviour
             if (isAttachedToCeiling)
             {
                 DetachFromCeiling();
-                rb.AddForce(Vector2.down * jumpForce, ForceMode2D.Impulse);
+                rb.linearVelocity = Vector2.down * jumpForce; // Changed from AddForce for more consistent jump
+                isJumping = true;
+                Debug.Log("Jumping from ceiling");
             }
             else if (isGrounded)
             {
                 jumpBufferCounter = inputBufferTime;
                 isJumping = true;
-                rb.AddForce(Vector2.up * jumpForce, ForceMode2D.Impulse);
+                rb.linearVelocity = Vector2.up * jumpForce; // Changed from AddForce for more consistent jump
+                Debug.Log("Jumping from ground");
             }
         }
         else if (context.canceled && rb.linearVelocity.y > 0 && !isAttachedToCeiling)
         {
+            // Variable jump height - when button is released early
             rb.linearVelocity = new Vector2(rb.linearVelocity.x, rb.linearVelocity.y * 0.5f);
+            Debug.Log("Jump canceled - cutting velocity");
         }
     }
 
@@ -239,9 +274,9 @@ public class PlayerController : MonoBehaviour
         if (collision.gameObject.CompareTag("Ground"))
         {
             isJumping = false;
-            if (animator != null)
+            if (wizAnimator != null)
             {
-                animator.SetTrigger("Idle");
+                wizAnimator.Idle();
             }
         }
     }
@@ -276,5 +311,21 @@ public class PlayerController : MonoBehaviour
     private void DetachFromCeiling()
     {
         isAttachedToCeiling = false;
+    }
+
+    public void TakeDamage()
+    {
+        if (wizAnimator != null)
+        {
+            wizAnimator.Hurt();
+        }
+    }
+
+    public void Die()
+    {
+        if (wizAnimator != null)
+        {
+            wizAnimator.Die();
+        }
     }
 }
