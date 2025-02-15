@@ -60,6 +60,11 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float attackCooldown = 0.5f;
     private float attackTimer;
 
+    [Header("Combat")]
+    [SerializeField] private float knockbackForce = 5f;
+    [SerializeField] private float knockbackDuration = 0.2f;
+    private bool isKnockedBack;
+
     [Header("Input Buffer")]
     [SerializeField] private float inputBufferTime = 0.2f;
     private float jumpBufferCounter;
@@ -492,7 +497,7 @@ public class PlayerController : MonoBehaviour
 
     public void TakeDamage(int damage)
     {
-        if (isFlipping) return; // Optional: ignore damage while flipping
+        if (isFlipping || isKnockedBack) return;
 
         currentHealth -= damage;
         
@@ -507,11 +512,33 @@ public class PlayerController : MonoBehaviour
             return;
         }
 
-        // Optional: Add invincibility frames or knockback here
+        // Apply knockback
+        StartCoroutine(ApplyKnockback());
+
         if (wizAnimator != null)
         {
             wizAnimator.Hurt();
         }
+    }
+
+    private IEnumerator ApplyKnockback()
+    {
+        isKnockedBack = true;
+        
+        // Determine knockback direction (opposite of current facing direction)
+        float direction = isFacingRight ? -1f : 1f;
+        
+        // Apply the knockback force
+        rb.velocity = new Vector2(direction * knockbackForce, rb.velocity.y + 2f);
+        
+        // Briefly disable player input
+        inputActions.Disable();
+        
+        yield return new WaitForSeconds(knockbackDuration);
+        
+        // Re-enable input and reset state
+        inputActions.Enable();
+        isKnockedBack = false;
     }
 
     public void Die()

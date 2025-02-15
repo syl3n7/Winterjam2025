@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 8922766846948904790}
   - component: {fileID: 1729525578543276261}
   - component: {fileID: 8642313248026562059}
+  - component: {fileID: 414226036797883245}
   m_Layer: 3
   m_Name: Enemy
   m_TagString: Enemy
@@ -132,12 +133,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   pointA: {fileID: 0}
   pointB: {fileID: 0}
-  moveSpeed: 6
+  patrolSpeed: 3
+  chaseSpeed: 7
   startAtPointA: 0
   detectionRadius: 7
   playerLayer:
     serializedVersion: 2
     m_Bits: 64
+  waitTimeAfterChase: 3
+  accelerationTime: 0.5
+  maxHealth: 3
+  damageAmount: 1
+  damageInterval: 0.7
 --- !u!95 &1729525578543276261
 Animator:
   serializedVersion: 7
@@ -197,3 +204,17 @@ CapsuleCollider2D:
   m_Offset: {x: 0.2716236, y: -0.40698457}
   m_Size: {x: 1.4559784, y: 2.0092802}
   m_Direction: 0
+--- !u!114 &414226036797883245
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8211172015352696140}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 07e5790376abe4c07a2b6e4441c8f3db, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  flashDuration: 0.25
+  flashColor: {r: 1, g: 0, b: 0, a: 1}
