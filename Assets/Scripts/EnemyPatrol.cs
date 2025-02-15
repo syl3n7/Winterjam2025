@@ -227,7 +227,7 @@ public class EnemyPatrol : MonoBehaviour
         float direction = isFacingRight ? -1f : 1f;
         
         // Apply knockback force
-        rb.velocity = new Vector2(direction * knockbackForce, rb.velocity.y + 1f);
+        rb.linearVelocity = new Vector2(direction * knockbackForce, rb.linearVelocity.y + 1f);
         
         yield return new WaitForSeconds(knockbackDuration);
         
