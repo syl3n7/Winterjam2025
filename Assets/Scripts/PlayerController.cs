@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 using ClearSky;
+using System.Collections;
 
 public class PlayerController : MonoBehaviour
 {
@@ -27,7 +28,12 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float ceilingCheckDistance = 1f;
     [SerializeField] private float ceilingDetachThreshold = 0.1f;
     [SerializeField] private KeyCode attachToCeilingKey = KeyCode.LeftShift;
+    [SerializeField] private float flipDuration = 0.5f;
     private bool isAttachedToCeiling;
+    private bool isFlipping;
+    private float flipProgress;
+    private Quaternion startRotation;
+    private Quaternion targetRotation;
 
     [Header("States")]
     private bool isJumping;
@@ -304,15 +310,90 @@ public class PlayerController : MonoBehaviour
 
     private void AttachToCeiling(Vector2 attachPoint)
     {
+        if (isFlipping) return;
+        
         isAttachedToCeiling = true;
         Vector2 newPosition = new Vector2(transform.position.x, attachPoint.y - ceilingDetachThreshold);
         transform.position = newPosition;
         rb.linearVelocity = new Vector2(rb.linearVelocity.x, 0f);
+        
+        // Start the flip animation
+        StartCoroutine(FlipToCeiling());
+    }
+
+    private IEnumerator FlipToCeiling()
+    {
+        isFlipping = true;
+        flipProgress = 0f;
+        startRotation = transform.rotation;
+        targetRotation = Quaternion.Euler(0, 0, 180f);
+        
+        // Temporarily disable physics during flip
+        rb.simulated = false;
+        
+        while (flipProgress < 1f)
+        {
+            flipProgress += Time.deltaTime / flipDuration;
+            
+            // Use SmoothStep for easier in/out animation
+            float smoothProgress = Mathf.SmoothStep(0, 1, flipProgress);
+            
+            // Interpolate rotation with a slight arc effect
+            float currentAngle = Mathf.LerpAngle(0, 180, smoothProgress);
+            transform.rotation = Quaternion.Euler(0, 0, currentAngle);
+            
+            // Add a small upward arc during the flip
+            float arcHeight = Mathf.Sin(smoothProgress * Mathf.PI) * 0.5f;
+            Vector3 currentPos = transform.position;
+            currentPos.y += arcHeight * Time.deltaTime;
+            transform.position = currentPos;
+            
+            yield return null;
+        }
+        
+        // Ensure we end up exactly at the target rotation
+        transform.rotation = targetRotation;
+        rb.simulated = true;
+        isFlipping = false;
     }
 
     private void DetachFromCeiling()
     {
+        if (isFlipping) return;
+        
         isAttachedToCeiling = false;
+        StartCoroutine(FlipFromCeiling());
+    }
+
+    private IEnumerator FlipFromCeiling()
+    {
+        isFlipping = true;
+        flipProgress = 0f;
+        startRotation = transform.rotation;
+        targetRotation = Quaternion.identity;
+        
+        rb.simulated = false;
+        
+        while (flipProgress < 1f)
+        {
+            flipProgress += Time.deltaTime / flipDuration;
+            
+            float smoothProgress = Mathf.SmoothStep(0, 1, flipProgress);
+            float currentAngle = Mathf.LerpAngle(180, 0, smoothProgress);
+            transform.rotation = Quaternion.Euler(0, 0, currentAngle);
+            
+            // Add a small downward arc during the flip
+            float arcHeight = Mathf.Sin(smoothProgress * Mathf.PI) * 0.5f;
+            Vector3 currentPos = transform.position;
+            currentPos.y -= arcHeight * Time.deltaTime;
+            transform.position = currentPos;
+            
+            yield return null;
+        }
+        
+        transform.rotation = targetRotation;
+        rb.simulated = true;
+        isFlipping = false;
     }
 
     public void TakeDamage()
