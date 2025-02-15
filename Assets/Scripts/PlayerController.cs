@@ -315,7 +315,10 @@ public class PlayerController : MonoBehaviour
         isAttachedToCeiling = true;
         Vector2 newPosition = new Vector2(transform.position.x, attachPoint.y - ceilingDetachThreshold);
         transform.position = newPosition;
-        rb.linearVelocity = new Vector2(rb.linearVelocity.x, 0f);
+        rb.velocity = new Vector2(rb.velocity.x, 0f);
+        
+        // Invert gravity for all objects
+        GravityController.Instance.InvertGravity();
         
         // Start the flip animation
         StartCoroutine(FlipToCeiling());
@@ -362,6 +365,10 @@ public class PlayerController : MonoBehaviour
         if (isFlipping) return;
         
         isAttachedToCeiling = false;
+        
+        // Restore normal gravity
+        GravityController.Instance.InvertGravity();
+        
         StartCoroutine(FlipFromCeiling());
     }
 
