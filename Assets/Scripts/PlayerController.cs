@@ -331,7 +331,7 @@ public class PlayerController : MonoBehaviour
             {
                 // Set the direction based on facing direction
                 float direction = isFacingRight ? 1f : -1f;
-                projectileRb.velocity = new Vector2(direction * 10f, 0f); // Adjust speed (10f) as needed
+                projectileRb.linearVelocity = new Vector2(direction * 10f, 0f); // Adjust speed (10f) as needed
                 
                 // Flip sprite if needed
                 Vector3 scale = projectile.transform.localScale;
