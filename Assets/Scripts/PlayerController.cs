@@ -106,6 +106,7 @@ public class PlayerController : MonoBehaviour
     {
         bool wasGrounded = isGrounded;
         isGrounded = Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, groundLayer);
+        Debug.DrawLine(transform.position, groundCheck.position, isGrounded ? Color.green : Color.red);
         
         // Only reset jumping if we've actually landed
         if (isGrounded && !wasGrounded)
@@ -206,10 +207,12 @@ public class PlayerController : MonoBehaviour
     {
         if (context.performed)
         {
+            Debug.Log($"Jump performed. IsGrounded: {isGrounded}, IsAttachedToCeiling: {isAttachedToCeiling}");
+            
             if (isAttachedToCeiling)
             {
                 DetachFromCeiling();
-                rb.linearVelocity = Vector2.down * jumpForce; // Changed from AddForce for more consistent jump
+                rb.linearVelocity = Vector2.down * jumpForce;
                 isJumping = true;
                 Debug.Log("Jumping from ceiling");
             }
@@ -217,13 +220,12 @@ public class PlayerController : MonoBehaviour
             {
                 jumpBufferCounter = inputBufferTime;
                 isJumping = true;
-                rb.linearVelocity = Vector2.up * jumpForce; // Changed from AddForce for more consistent jump
-                Debug.Log("Jumping from ground");
+                rb.linearVelocity = Vector2.up * jumpForce;
+                Debug.Log($"Jumping from ground with force: {jumpForce}");
             }
         }
-        else if (context.canceled && rb.linearVelocity.y > 0 && !isAttachedToCeiling)
+        else if (context.canceled && rb.linearVelocity.y > 0)
         {
-            // Variable jump height - when button is released early
             rb.linearVelocity = new Vector2(rb.linearVelocity.x, rb.linearVelocity.y * 0.5f);
             Debug.Log("Jump canceled - cutting velocity");
         }
@@ -326,6 +328,16 @@ public class PlayerController : MonoBehaviour
         if (wizAnimator != null)
         {
             wizAnimator.Die();
+        }
+    }
+
+    private void OnDrawGizmos()
+    {
+        if (groundCheck != null)
+        {
+            // Draw ground check radius
+            Gizmos.color = isGrounded ? Color.green : Color.red;
+            Gizmos.DrawWireSphere(groundCheck.position, groundCheckRadius);
         }
     }
 }

@@ -164810,6 +164810,22 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 704597400867577469, guid: 76957f06908ce440aa44c909254f5894, type: 3}
+      propertyPath: m_Size.x
+      value: 1.1486199
+      objectReference: {fileID: 0}
+    - target: {fileID: 704597400867577469, guid: 76957f06908ce440aa44c909254f5894, type: 3}
+      propertyPath: m_Size.y
+      value: 4.123243
+      objectReference: {fileID: 0}
+    - target: {fileID: 704597400867577469, guid: 76957f06908ce440aa44c909254f5894, type: 3}
+      propertyPath: m_Offset.x
+      value: 0.5502014
+      objectReference: {fileID: 0}
+    - target: {fileID: 704597400867577469, guid: 76957f06908ce440aa44c909254f5894, type: 3}
+      propertyPath: m_Offset.y
+      value: 0.85862577
+      objectReference: {fileID: 0}
     - target: {fileID: 2014437728474623489, guid: 76957f06908ce440aa44c909254f5894, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0.57
@@ -164862,9 +164878,17 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 6776375101450746634, guid: 76957f06908ce440aa44c909254f5894, type: 3}
-      propertyPath: m_Mass
-      value: 0.6892429
+    - target: {fileID: 6821066689890849359, guid: 76957f06908ce440aa44c909254f5894, type: 3}
+      propertyPath: m_Size.y
+      value: 0.17846799
+      objectReference: {fileID: 0}
+    - target: {fileID: 6821066689890849359, guid: 76957f06908ce440aa44c909254f5894, type: 3}
+      propertyPath: m_Offset.y
+      value: -1.1381489
+      objectReference: {fileID: 0}
+    - target: {fileID: 6821066689890849359, guid: 76957f06908ce440aa44c909254f5894, type: 3}
+      propertyPath: m_IsTrigger
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 7139570953479690502, guid: 76957f06908ce440aa44c909254f5894, type: 3}
       propertyPath: near clip plane
