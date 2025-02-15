@@ -8,6 +8,7 @@ TagManager:
   - Snow
   - Enemy
   - Stalactite
+  - Thorne
   layers:
   - Default
   - TransparentFX
@@ -19,7 +20,7 @@ TagManager:
   - Snow
   - Ground
   - Stalactite
-  - 
+  - Thorne
   - 
   - 
   - 

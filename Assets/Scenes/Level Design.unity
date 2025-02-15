@@ -152997,9 +152997,9 @@ GameObject:
   - component: {fileID: 718893411}
   - component: {fileID: 718893413}
   - component: {fileID: 718893414}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Thorne
-  m_TagString: Untagged
+  m_TagString: Thorne
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
