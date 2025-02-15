@@ -6,14 +6,21 @@ public class DamageFlash : MonoBehaviour
     [SerializeField] private float flashDuration = 0.2f;
     [SerializeField] private Color flashColor = Color.red;
     
-    private SpriteRenderer spriteRenderer;
-    private Color originalColor;
+    private SpriteRenderer[] spriteRenderers;
+    private Color[] originalColors;
     private bool isFlashing;
 
     private void Awake()
     {
-        spriteRenderer = GetComponent<SpriteRenderer>();
-        originalColor = spriteRenderer.color;
+        // Get all sprite renderers in children
+        spriteRenderers = GetComponentsInChildren<SpriteRenderer>();
+        originalColors = new Color[spriteRenderers.Length];
+        
+        // Store original colors
+        for (int i = 0; i < spriteRenderers.Length; i++)
+        {
+            originalColors[i] = spriteRenderers[i].color;
+        }
     }
 
     public void Flash()
@@ -26,7 +33,7 @@ public class DamageFlash : MonoBehaviour
         {
             // Reset and restart flash
             StopAllCoroutines();
-            spriteRenderer.color = originalColor;
+            RestoreOriginalColors();
             StartCoroutine(FlashRoutine());
         }
     }
@@ -34,9 +41,24 @@ public class DamageFlash : MonoBehaviour
     private IEnumerator FlashRoutine()
     {
         isFlashing = true;
-        spriteRenderer.color = flashColor;
+        
+        // Set flash color for all sprites
+        for (int i = 0; i < spriteRenderers.Length; i++)
+        {
+            spriteRenderers[i].color = flashColor;
+        }
+        
         yield return new WaitForSeconds(flashDuration);
-        spriteRenderer.color = originalColor;
+        
+        RestoreOriginalColors();
         isFlashing = false;
+    }
+
+    private void RestoreOriginalColors()
+    {
+        for (int i = 0; i < spriteRenderers.Length; i++)
+        {
+            spriteRenderers[i].color = originalColors[i];
+        }
     }
 }
