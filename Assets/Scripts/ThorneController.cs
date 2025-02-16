@@ -39,7 +39,8 @@ public class ThorneController : MonoBehaviour
             PlayerController player = collision.GetComponent<PlayerController>();
             if (player != null)
             {
-                player.TakeDamage(damageAmount);
+                // Pass the thorn's position as damage source
+                player.TakeDamage(damageAmount, transform.position);
                 canDealDamage = false;
                 damageTimer = 0f;
             }

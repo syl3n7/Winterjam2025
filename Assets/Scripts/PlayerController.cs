@@ -76,6 +76,8 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float inputBufferTime = 0.2f;
     private float jumpBufferCounter;
 
+    private Vector2 lastDamageSourcePosition;
+
     private void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
@@ -537,15 +539,51 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    public void TakeDamage(int damage, Vector2 damageSourcePosition)
+    {
+        if (isFlipping || isKnockedBack) return;
+
+        lastDamageSourcePosition = damageSourcePosition;
+        currentHealth -= damage;
+        
+        if (damageFlash != null)
+        {
+            damageFlash.Flash();
+        }
+
+        // Notify health UI
+        HealthUI healthUI = FindObjectOfType<HealthUI>();
+        if (healthUI != null)
+        {
+            healthUI.UpdateHearts(currentHealth);
+        }
+
+        if (currentHealth <= 0)
+        {
+            Die();
+            return;
+        }
+
+        // Apply knockback based on damage source position
+        StartCoroutine(ApplyKnockback());
+
+        if (wizAnimator != null)
+        {
+            wizAnimator.Hurt();
+        }
+    }
+
     private IEnumerator ApplyKnockback()
     {
         isKnockedBack = true;
         
-        // Determine knockback direction (opposite of current facing direction)
-        float direction = isFacingRight ? -1f : 1f;
+        // Calculate knockback direction based on damage source
+        Vector2 knockbackDirection = (transform.position - (Vector3)lastDamageSourcePosition).normalized;
         
-        // Apply the knockback force
-        rb.linearVelocity = new Vector2(direction * knockbackForce, rb.linearVelocity.y + 2f);
+        // Apply the knockback force with upward boost
+        float knockbackStrength = knockbackForce * 5f; // Increased to 5x for stronger effect
+        rb.linearVelocity = Vector2.zero; // Reset current velocity
+        rb.AddForce(new Vector2(knockbackDirection.x * knockbackStrength, 3f), ForceMode2D.Impulse);
         
         // Briefly disable player input
         inputActions.Disable();

@@ -300,7 +300,8 @@ public class EnemyPatrol : MonoBehaviour
             PlayerController player = collision.gameObject.GetComponent<PlayerController>();
             if (player != null)
             {
-                player.TakeDamage(damageAmount);
+                // Pass the enemy's position as damage source
+                player.TakeDamage(damageAmount, transform.position);
                 canDealDamage = false;
                 damageTimer = 0f;
             }
