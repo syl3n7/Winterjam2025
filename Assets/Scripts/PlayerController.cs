@@ -81,6 +81,9 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private Transform[] ammoSpawnPoints;
     [SerializeField] private GameObject ammoPrefab;
 
+    [Header("UI References")]
+    [SerializeField] private DeathScreen deathScreen;
+
     private Vector2 lastDamageSourcePosition;
 
     private void Awake()
@@ -605,9 +608,20 @@ public class PlayerController : MonoBehaviour
         {
             wizAnimator.Die();
         }
-        GravityController.Instance.ResetGravity();
-        transform.rotation = Quaternion.identity; // Reset rotation
-        isAttachedToCeiling = false;
+        
+        // Disable player input and physics
+        inputActions.Disable();
+        rb.simulated = false;
+        
+        // Show death screen
+        if (deathScreen != null)
+        {
+            deathScreen.Show();
+        }
+    }
+
+    public void Respawn()
+    {
         StartCoroutine(RespawnSequence());
     }
 

@@ -372,7 +372,7 @@ public class EnemyPatrol : MonoBehaviour
         // Reset velocity
         if (rb != null)
         {
-            rb.velocity = Vector2.zero;
+            rb.linearVelocity = Vector2.zero;
         }
     }
 
