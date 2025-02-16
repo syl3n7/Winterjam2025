@@ -224,33 +224,30 @@ public class PlayerController : MonoBehaviour
         {
             // Add a small threshold to prevent jittery transitions
             float moveThreshold = 0.1f;
-            bool isMoving = Mathf.Abs(rb.linearVelocity.x) > moveThreshold;
+            bool isMoving = Mathf.Abs(moveInput.x) > moveThreshold;
 
-            if (isMoving)
+            if (isAttachedToCeiling)
             {
-                if (isAttachedToCeiling)
+                if (isMoving)
                 {
                     wizAnimator.Run();
-                    wizAnimator.LookUp();
-                }
-                else
-                {
-                    wizAnimator.Run();
-                }
-            }
-            else
-            {
-                if (isAttachedToCeiling)
-                {
-                    wizAnimator.LookUp();
                 }
                 else
                 {
                     wizAnimator.Idle();
                 }
             }
-
-            // ... rest of your animation code ...
+            else
+            {
+                if (isMoving)
+                {
+                    wizAnimator.Run();
+                }
+                else
+                {
+                    wizAnimator.Idle();
+                }
+            }
         }
     }
 
