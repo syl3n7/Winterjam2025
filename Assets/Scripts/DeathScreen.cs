@@ -37,7 +37,7 @@ public class DeathScreen : MonoBehaviour
     public void Show()
     {
         Debug.Log("Showing death screen"); // Debug log
-        gameObject.SetActive(true);  // Show panel when player dies
+        gameObject.SetActive(true);
         StartCoroutine(FadeIn());
     }
     

@@ -8,17 +8,26 @@ public class AmmoUI : MonoBehaviour
 
     private void Awake()
     {
+        // Add safety check
+        if (GetComponent<RectTransform>() == null)
+        {
+            gameObject.AddComponent<RectTransform>();
+        }
         rectTransform = GetComponent<RectTransform>();
         SetupUIPosition();
     }
 
     private void SetupUIPosition()
     {
-        // Position in top-right corner below hearts
-        rectTransform.anchorMin = Vector2.one;
-        rectTransform.anchorMax = Vector2.one;
-        rectTransform.pivot = Vector2.one;
-        rectTransform.anchoredPosition = new Vector2(-20f, -60f); // Below hearts
+        RectTransform rectTransform = GetComponent<RectTransform>();
+        if (rectTransform != null)
+        {
+            // Position in top-right corner below hearts
+            rectTransform.anchorMin = Vector2.one;
+            rectTransform.anchorMax = Vector2.one;
+            rectTransform.pivot = Vector2.one;
+            rectTransform.anchoredPosition = new Vector2(-20f, -60f); // Below hearts
+        }
     }
 
     public void UpdateAmmoText(int currentAmmo)
