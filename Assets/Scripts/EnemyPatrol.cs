@@ -27,6 +27,14 @@ public class EnemyPatrol : MonoBehaviour
     private bool canDealDamage = true;
     private bool isKnockedBack;
 
+    [Header("Ranged Attack")]
+    [SerializeField] private float attackRange = 3f;
+    [SerializeField] private float projectileGrowDuration = 0.9f;
+    [SerializeField] private GameObject projectilePrefab;
+    [SerializeField] private Transform firePoint;
+    private bool isCharging;
+    private GameObject currentProjectile;
+
     private Vector3 currentTarget;
     private Rigidbody2D rb;
     private bool isFacingRight = true;
@@ -43,7 +51,8 @@ public class EnemyPatrol : MonoBehaviour
     {
         Patrolling,
         Chasing,
-        WaitingAtLastSeen
+        WaitingAtLastSeen,
+        ChargingAttack
     }
 
     private void Start()
@@ -112,6 +121,17 @@ public class EnemyPatrol : MonoBehaviour
                     }
                 }
                 break;
+
+            case EnemyState.ChargingAttack:
+                if (playerCollider == null)
+                {
+                    if (!isCharging)
+                    {
+                        currentState = EnemyState.WaitingAtLastSeen;
+                        waitTimer = waitTimeAfterChase;
+                    }
+                }
+                break;
         }
 
         UpdateFacing();
@@ -131,8 +151,63 @@ public class EnemyPatrol : MonoBehaviour
 
     private void ChasePlayer()
     {
-        Vector2 direction = (player.position - transform.position).normalized;
-        rb.linearVelocity = new Vector2(direction.x * currentSpeed, rb.linearVelocity.y);
+        if (Vector2.Distance(transform.position, player.position) <= attackRange)
+        {
+            currentState = EnemyState.ChargingAttack;
+            StartCoroutine(ChargeAndShootProjectile());
+        }
+        else
+        {
+            Vector2 direction = (player.position - transform.position).normalized;
+            rb.linearVelocity = new Vector2(direction.x * currentSpeed, rb.linearVelocity.y);
+        }
+    }
+
+    private IEnumerator ChargeAndShootProjectile()
+    {
+        isCharging = true;
+        rb.linearVelocity = Vector2.zero;
+
+        // Create and grow projectile
+        currentProjectile = Instantiate(projectilePrefab, firePoint.position, Quaternion.identity);
+        currentProjectile.transform.localScale = Vector3.one * 0.2374319f;
+
+        float elapsedTime = 0f;
+        Vector3 targetScale = Vector3.one * 0.45f;
+        Vector3 initialScale = currentProjectile.transform.localScale;
+
+        while (elapsedTime < projectileGrowDuration)
+        {
+            elapsedTime += Time.deltaTime;
+            float progress = elapsedTime / projectileGrowDuration;
+            currentProjectile.transform.localScale = Vector3.Lerp(initialScale, targetScale, progress);
+            
+            // Double detection radius while charging
+            detectionRadius *= 2f;
+            
+            // Update position to follow firePoint
+            currentProjectile.transform.position = firePoint.position;
+            
+            yield return null;
+        }
+
+        // Shoot projectile
+        if (currentProjectile != null)
+        {
+            EnemyProjectile projectileComponent = currentProjectile.GetComponent<EnemyProjectile>();
+            if (projectileComponent != null)
+            {
+                // Reverse the direction to match the enemy's reversed facing logic
+                bool projectileDirection = !isFacingRight;
+                projectileComponent.Initialize(projectileDirection);
+            }
+        }
+
+        // Reset state
+        isCharging = false;
+        detectionRadius /= 2f; // Return to normal detection radius
+        currentState = EnemyState.WaitingAtLastSeen;
+        waitTimer = waitTimeAfterChase;
     }
 
     private void UpdateFacing()
