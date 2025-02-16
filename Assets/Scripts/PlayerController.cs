@@ -305,18 +305,12 @@ public class PlayerController : MonoBehaviour
         {
             currentAmmo--;
             GameObject projectile = Instantiate(projectilePrefab, firePoint.position, Quaternion.identity);
-            Rigidbody2D projectileRb = projectile.GetComponent<Rigidbody2D>();
+            Projectile projectileComponent = projectile.GetComponent<Projectile>();
             
-            if (projectileRb != null)
+            if (projectileComponent != null)
             {
-                // Set the direction based on facing direction
-                float direction = isFacingRight ? 1f : -1f;
-                projectileRb.linearVelocity = new Vector2(direction * 10f, 0f); // Adjust speed (10f) as needed
-                
-                // Flip sprite if needed
-                Vector3 scale = projectile.transform.localScale;
-                scale.x *= direction;
-                projectile.transform.localScale = scale;
+                // Tell the projectile which direction to move
+                projectileComponent.Initialize(isFacingRight);
             }
 
             // Update UI
@@ -577,11 +571,19 @@ public class PlayerController : MonoBehaviour
     {
         isKnockedBack = true;
         
+        // If player is on ceiling, detach and reset gravity first
+        if (isAttachedToCeiling)
+        {
+            isAttachedToCeiling = false;
+            GravityController.Instance.ResetGravity();
+            transform.rotation = Quaternion.identity;
+        }
+        
         // Calculate knockback direction based on damage source
         Vector2 knockbackDirection = (transform.position - (Vector3)lastDamageSourcePosition).normalized;
         
         // Apply the knockback force with upward boost
-        float knockbackStrength = knockbackForce * 5f; // Increased to 5x for stronger effect
+        float knockbackStrength = knockbackForce * 5f;
         rb.linearVelocity = Vector2.zero; // Reset current velocity
         rb.AddForce(new Vector2(knockbackDirection.x * knockbackStrength, 3f), ForceMode2D.Impulse);
         
