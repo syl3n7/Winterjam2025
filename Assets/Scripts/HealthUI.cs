@@ -34,8 +34,10 @@ public class HealthUI : MonoBehaviour
 
     public void UpdateHearts(int currentHealth)
     {
+        // Start from the leftmost heart (index 0)
         for (int i = 0; i < heartImages.Length; i++)
         {
+            // Fill hearts from left to right
             heartImages[i].sprite = i < currentHealth ? fullHeartSprite : emptyHeartSprite;
         }
     }

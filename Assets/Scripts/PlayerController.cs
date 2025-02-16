@@ -179,24 +179,8 @@ public class PlayerController : MonoBehaviour
     {
         float currentSpeed = isSprinting ? sprintSpeed : moveSpeed;
         
-        if (isAttachedToCeiling)
-        {
-            // When on ceiling, only allow X movement
-            rb.linearVelocity = new Vector2(moveInput.x * currentSpeed, 0f);
-            
-            // Explicitly maintain Y position
-            Vector3 pos = transform.position;
-            pos.y = transform.position.y; // Keep Y position constant
-            transform.position = pos;
-            
-            // Ensure Y movement is constrained
-            rb.constraints = RigidbodyConstraints2D.FreezeRotation | RigidbodyConstraints2D.FreezePositionY;
-        }
-        else
-        {
-            rb.constraints = RigidbodyConstraints2D.FreezeRotation;
-            rb.linearVelocity = new Vector2(moveInput.x * currentSpeed, rb.linearVelocity.y);
-        }
+        // Simplified movement code - no need to handle ceiling separately
+        rb.linearVelocity = new Vector2(moveInput.x * currentSpeed, rb.linearVelocity.y);
 
         // Handle facing direction
         if (moveInput.x != 0)
@@ -236,14 +220,16 @@ public class PlayerController : MonoBehaviour
     {
         if (wizAnimator != null)
         {
-            // Handle running animation for both ground and ceiling
-            if (Mathf.Abs(moveInput.x) > 0.1f)
+            // Add a small threshold to prevent jittery transitions
+            float moveThreshold = 0.1f;
+            bool isMoving = Mathf.Abs(rb.linearVelocity.x) > moveThreshold;
+
+            if (isMoving)
             {
                 if (isAttachedToCeiling)
                 {
-                    // Optional: You could create a specific ceiling-run animation
                     wizAnimator.Run();
-                    wizAnimator.LookUp(); // Maintain the upward look while running
+                    wizAnimator.LookUp();
                 }
                 else
                 {
@@ -262,15 +248,7 @@ public class PlayerController : MonoBehaviour
                 }
             }
 
-            if (isJumping && !isAttachedToCeiling)
-            {
-                wizAnimator.Jump();
-            }
-
-            if (isAttacking)
-            {
-                wizAnimator.Attack();
-            }
+            // ... rest of your animation code ...
         }
     }
 
@@ -394,17 +372,18 @@ public class PlayerController : MonoBehaviour
     private void CheckCeilingAttachment()
     {
         RaycastHit2D ceilingHit = Physics2D.Raycast(transform.position, Vector2.up, ceilingCheckDistance, groundLayer);
+        Debug.DrawRay(transform.position, Vector2.up * ceilingCheckDistance, Color.yellow); // Debug visualization
         
         // If we're attached to ceiling, check if we should detach
         if (isAttachedToCeiling)
         {
-            if (!ceilingHit || !ceilingHit.collider.CompareTag("Ground"))
+            if (!ceilingHit)
             {
                 DetachFromCeiling();
             }
         }
         // If we're not attached, check if we can attach
-        else if (Input.GetKey(attachToCeilingKey) && ceilingHit && ceilingHit.collider.CompareTag("Ground"))
+        else if (Input.GetKey(attachToCeilingKey) && ceilingHit)
         {
             AttachToCeiling(ceilingHit.point);
         }
@@ -420,11 +399,13 @@ public class PlayerController : MonoBehaviour
         Collider2D collider = GetComponent<Collider2D>();
         float colliderHeight = collider != null ? collider.bounds.size.y : 1f;
         Vector2 newPosition = new Vector2(transform.position.x, 
-            attachPoint.y - (colliderHeight * 0.5f) - 0.01f); // Tiny offset to ensure contact
+            attachPoint.y - (colliderHeight * 0.5f));
         transform.position = newPosition;
         
         rb.linearVelocity = Vector2.zero;
-        rb.constraints = RigidbodyConstraints2D.FreezeRotation | RigidbodyConstraints2D.FreezePositionY;
+        
+        // Use GravityController instead of directly modifying gravity
+        GravityController.Instance.InvertGravity();
         
         StartCoroutine(FlipToCeiling());
     }
@@ -469,8 +450,10 @@ public class PlayerController : MonoBehaviour
         if (isFlipping) return;
         
         isAttachedToCeiling = false;
-        // Restore original constraints
-        rb.constraints = RigidbodyConstraints2D.FreezeRotation;
+        
+        // Use GravityController to restore normal gravity
+        GravityController.Instance.InvertGravity();
+        
         StartCoroutine(FlipFromCeiling());
     }
 
@@ -580,6 +563,9 @@ public class PlayerController : MonoBehaviour
         {
             wizAnimator.Die();
         }
+        GravityController.Instance.ResetGravity();
+        transform.rotation = Quaternion.identity; // Reset rotation
+        isAttachedToCeiling = false;
         StartCoroutine(RespawnSequence());
     }
 
@@ -600,6 +586,13 @@ public class PlayerController : MonoBehaviour
         isFlipping = false;
         isJumping = false;
         isAttacking = false;
+        
+        // Update health UI with full hearts
+        HealthUI healthUI = FindObjectOfType<HealthUI>();
+        if (healthUI != null)
+        {
+            healthUI.UpdateHearts(currentHealth);
+        }
         
         // Re-enable player
         rb.simulated = true;
