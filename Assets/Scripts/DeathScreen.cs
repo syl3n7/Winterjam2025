@@ -14,8 +14,19 @@ public class DeathScreen : MonoBehaviour
     
     private void Awake()
     {
+        if (canvasGroup == null)
+        {
+            canvasGroup = GetComponent<CanvasGroup>();
+        }
+        
         canvasGroup.alpha = 0f;
         gameObject.SetActive(false);
+        
+        // Setup button listeners
+        if (restartButton != null)
+        {
+            restartButton.onClick.AddListener(OnRestartClicked);
+        }
         
         if (exitButton != null)
         {
@@ -25,6 +36,7 @@ public class DeathScreen : MonoBehaviour
     
     public void Show()
     {
+        Debug.Log("Showing death screen"); // Debug log
         gameObject.SetActive(true);  // Show panel when player dies
         StartCoroutine(FadeIn());
     }

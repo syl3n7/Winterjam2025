@@ -612,11 +612,24 @@ public class PlayerController : MonoBehaviour
         // Disable player input and physics
         inputActions.Disable();
         rb.simulated = false;
+        rb.linearVelocity = Vector2.zero; // Stop any movement
         
-        // Show death screen
+        // Show death screen after a short delay
+        StartCoroutine(ShowDeathScreenDelayed());
+    }
+
+    private IEnumerator ShowDeathScreenDelayed()
+    {
+        yield return new WaitForSeconds(0.5f); // Wait for death animation
+        
         if (deathScreen != null)
         {
+            deathScreen.gameObject.SetActive(true); // Ensure panel is active
             deathScreen.Show();
+        }
+        else
+        {
+            Debug.LogError("Death Screen reference is missing!");
         }
     }
 
