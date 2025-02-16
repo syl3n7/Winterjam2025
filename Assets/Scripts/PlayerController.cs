@@ -69,12 +69,17 @@ public class PlayerController : MonoBehaviour
     [Header("Ammo")]
     [SerializeField] private int currentAmmo = 0;
     [SerializeField] private float pickupRadius = 1f;
-    [SerializeField] private LayerMask stalactiteLayer; // Changed from thorneLayer
+    [SerializeField] private LayerMask stalactiteLayer;
     private AmmoUI ammoUI;
 
     [Header("Input Buffer")]
     [SerializeField] private float inputBufferTime = 0.2f;
     private float jumpBufferCounter;
+
+    [Header("Reset References")]
+    [SerializeField] private EnemyPatrol[] enemyArray;
+    [SerializeField] private Transform[] ammoSpawnPoints;
+    [SerializeField] private GameObject ammoPrefab;
 
     private Vector2 lastDamageSourcePosition;
 
@@ -613,10 +618,11 @@ public class PlayerController : MonoBehaviour
         
         yield return new WaitForSeconds(1f);
         
-        // Use the Transform's position
+        // Reset player
         transform.position = respawnPoint.position;
         currentHealth = maxHealth;
         transform.rotation = Quaternion.identity;
+        currentAmmo = 0;
         
         // Reset states
         isAttachedToCeiling = false;
@@ -624,11 +630,40 @@ public class PlayerController : MonoBehaviour
         isJumping = false;
         isAttacking = false;
         
-        // Update health UI with full hearts
+        // Reset enemies
+        foreach (EnemyPatrol enemy in enemyArray)
+        {
+            if (enemy != null)
+            {
+                enemy.ResetEnemy();
+            }
+        }
+        
+        // Reset stalactites using LayerMask
+        Collider2D[] stalactites = Physics2D.OverlapCircleAll(Vector2.zero, float.MaxValue, stalactiteLayer);
+        foreach (Collider2D stalactite in stalactites)
+        {
+            Destroy(stalactite.gameObject);
+        }
+        
+        // Spawn new stalactites at designated points
+        foreach (Transform spawnPoint in ammoSpawnPoints)
+        {
+            if (spawnPoint != null)
+            {
+                Instantiate(ammoPrefab, spawnPoint.position, Quaternion.identity);
+            }
+        }
+        
+        // Update UI
         HealthUI healthUI = FindObjectOfType<HealthUI>();
         if (healthUI != null)
         {
             healthUI.UpdateHearts(currentHealth);
+        }
+        if (ammoUI != null)
+        {
+            ammoUI.UpdateAmmoText(currentAmmo);
         }
         
         // Re-enable player

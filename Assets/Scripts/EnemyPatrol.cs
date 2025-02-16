@@ -339,6 +339,28 @@ public class EnemyPatrol : MonoBehaviour
         Destroy(gameObject);
     }
 
+    public void ResetEnemy()
+    {
+        // Reset position
+        transform.position = startAtPointA ? pointA.position : pointB.position;
+        
+        // Reset state
+        currentState = EnemyState.Patrolling;
+        currentHealth = maxHealth;
+        isCharging = false;
+        isKnockedBack = false;
+        currentSpeed = patrolSpeed;
+        
+        // Reset target
+        currentTarget = startAtPointA ? pointB.position : pointA.position;
+        
+        // Reset any active projectiles
+        if (currentProjectile != null)
+        {
+            Destroy(currentProjectile);
+        }
+    }
+
     private void OnDrawGizmos()
     {
         if (pointA != null && pointB != null)
