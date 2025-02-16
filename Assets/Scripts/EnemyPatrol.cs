@@ -350,14 +350,29 @@ public class EnemyPatrol : MonoBehaviour
         isCharging = false;
         isKnockedBack = false;
         currentSpeed = patrolSpeed;
+        waitTimer = 0f;
+        damageTimer = 0f;
+        canDealDamage = true;
         
-        // Reset target
+        // Reset target and player reference
         currentTarget = startAtPointA ? pointB.position : pointA.position;
+        player = null;
+        lastKnownPlayerPosition = transform.position;
+        
+        // Reset detection radius to normal
+        detectionRadius = detectionRadius / 2f; // Make sure it's at normal radius
         
         // Reset any active projectiles
         if (currentProjectile != null)
         {
             Destroy(currentProjectile);
+            currentProjectile = null;
+        }
+        
+        // Reset velocity
+        if (rb != null)
+        {
+            rb.velocity = Vector2.zero;
         }
     }
 
